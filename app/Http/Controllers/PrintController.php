@@ -93,6 +93,7 @@ class PrintController extends Controller
     public function print($id)
     {
 
+
         $header = collect(DB::select("SELECT   top 1  nal.NumOT as BrojNaloga, nal.AnoOT as GodinaNaloga,
         ltrim(rtrim(convert(char,nal.FechaAperturaOT,103))) + ' ' + right('0'+ltrim(rtrim(cast(nal.EntregaRealHora as int))),2)
         + ':'+ right('0'+ltrim(rtrim(cast(nal.EntregaRealMinuto as int))),2) as DatumPrijema
@@ -139,6 +140,7 @@ class PrintController extends Controller
         // $positions_sum = DB::select("SELECT 1 as one", ['id' => $id]);
 
 
+        $var = "";
 
         $title = "Stampa ugovora";
 
