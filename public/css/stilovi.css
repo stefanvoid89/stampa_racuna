@@ -1,0 +1,207 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+    background-color: #ffffff;
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+}
+
+body,
+td,
+th {
+    font-size: 12px;
+    color: #333333;
+}
+
+a:hover,
+active,
+visited {
+    text-decoration: none !important;
+    color: black !important;
+}
+
+a {
+    color: black !important;
+    text-decoration: none !important;
+}
+.naslov {
+    color: #00275e;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.footer {
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.error_box {
+    background-color: #ed5404;
+    padding: 10px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+.error_box a,
+.success_box a {
+    color: #ffffff;
+}
+.success_box {
+    background-color: #228822;
+    padding: 10px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* FORM POLJA */
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+input:not(.vs__search):not([type="checkbox"]):not(.invoice_item),
+select,
+option {
+    border: 1px solid rgba(60, 60, 60, 0.26);
+    min-width: 200px !important;
+    width: 200px;
+    border-radius: 4px;
+    min-height: 22px;
+    box-shadow: none !important;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="checkbox"]:hover,
+input[type="radio"]:hover,
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+    background: none;
+    border: none;
+}
+
+select {
+    -moz-appearance: none;
+
+    -webkit-appearance: none;
+}
+
+select[disabled] {
+    background: white;
+}
+
+/* KRAJ FORM POLJA*/
+
+/*** TABLE ****/
+
+/* Table styles
+---------------------------------------- */
+
+table#data {
+    width: 100%;
+    border: 1px solid #c0c0c0;
+    background-color: #ffffff;
+    padding: 1px;
+}
+
+table#data th {
+    padding: 3px 4px;
+    font-size: 0.9em;
+    background: #ffc107;
+    border: 1px solid black;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+table#data td {
+    padding: 4px;
+    line-height: 1.2em;
+}
+
+table#data.type2 {
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+table#data.type2 th {
+    background: none;
+    border-top: none;
+    text-align: center;
+    color: #ed5404;
+    padding: 2px 0;
+}
+
+table#data.type2 td {
+    padding: 0;
+    font-size: 1em;
+}
+
+table#data.type2 td.name {
+    padding: 2px;
+    vertical-align: middle;
+}
+
+table#data th.name {
+    text-align: left;
+    width: auto;
+}
+
+table#data td.name {
+    text-align: left;
+    font-weight: bold;
+}
+
+table#data .entry {
+    text-align: left;
+    font-weight: normal;
+}
+
+table#data .row1 {
+    background-color: #f9f9f9;
+}
+table#data .row2 {
+    background-color: #e3e3e3;
+}
+table#data .row3 {
+    background-color: #ffc6c8;
+}
+table#data .row3b {
+    background-color: #ffe0e1;
+}
+table#data .Over {
+    background-color: #f6f4d0;
+}
+table#data .Active {
+    background-color: #c7c7c7;
+}
+table#data .row4 {
+    background-color: #e4e8eb;
+}
+table#data .col1 {
+    background-color: #ffffff;
+}
+table#data .col2 {
+    background-color: #f9f9f9;
+}
+
+a.button,
+a.button:link,
+a.button:visited,
+a.button:active {
+    text-decoration: none;
+    font-weight: bold;
+    border: 1px solid #666666;
+    display: inline-block;
+}
+
+td > * {
+    vertical-align: middle;
+}
