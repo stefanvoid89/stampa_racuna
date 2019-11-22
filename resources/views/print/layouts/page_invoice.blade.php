@@ -61,8 +61,8 @@
                     <tr>
 
                         <td>
-                            <table id="prijem_table" class="parent" style="border-collapse: collapse;" width="100%"
-                                border="1">
+                            <table id="prijem_table" class="parent"
+                                style="border-collapse: collapse;table-layout: fixed;width:100%" border="1">
 
                                 <colgroup>
                                     <col style="width:10%">
@@ -106,11 +106,11 @@
                         <td>
 
                             <table id="kupac_table" class="parent"
-                                style="font-size:8pt;border-collapse: collapse;    margin-top: -1px;" width="100%"
+                                style="font-size:8pt;border-collapse: collapse;    margin-top: -1px;table-layout: fixed;width:100%"
                                 border="1" cellspacing="0">
 
                                 <colgroup>
-                                    <col style="width:56%">
+                                    <col style="width:55%">
                                     <col style="width:14%">
                                     <col style="width:15%">
                                     <col style="width:8%">
@@ -143,9 +143,9 @@
 
 
                                     </td>
-                                    <td></td>
+
                                     <td colspan="2" style="font-size:16pt;">RAČUN</td>
-                                    <td colspan="2">{{$header->BrojRacuna}}</td>
+                                    <td colspan="3">{{$header->BrojRacuna}}</td>
                                 </tr>
                                 <tr>
                                     <td>

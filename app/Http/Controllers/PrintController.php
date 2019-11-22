@@ -117,8 +117,16 @@ class PrintController extends Controller
         left  join tgpobla p on id=k.pobla
         where 1=1 and fak.NumIntFac = :id", ['id' => $id]))->first();
 
+        $interventions = collect(DB::select("SELECT distinct i.Numinterno, i.Referencia,cast(i.Descrip as varchar(max)) as Descrip ,i.TotalNetoIntervencion
+        from ttotCab nal
+        inner join ttotfac fak on nal.NumInterno=fak.numinterno
+        inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
+        inner join ttOtIntervencion I on i.Numinterno = kup.Numinterno
+        where 1=1
+        and fak.NumIntFac = :id", ['id' => $id]));
 
-        $positions =  collect(DB::select("SELECT i.Referencia as SifraIntervencije,i.Descrip as OpisIntervencije, l.Referencia As Sifra, str(l.CantidadHoras,8,2) as Kolicina,
+
+        $positions =  collect(DB::select("SELECT i.numinterno,i.Referencia as SifraIntervencije,i.Descrip as OpisIntervencije, l.Referencia As Sifra, str(l.CantidadHoras,8,2) as Kolicina,
         l.Descrip as Opis, l.PrecioUnitario as Cena,str(l.Descuento,8,2)  as Popust,l.impneto,i.TotalNetoIntervencion as UkupnoZahvatNeto,kup.ImpBrutoMO as UkupnoRadBruto,
         kup.ImpBrutoRec as ukupnoDeoBruto,kup.ImpBrutoTraSub as UkupnoOstaloBruto, kup.ImpDtoMO as PopustUsluge,kup.ImpDtoRec as PopustDeo,kup.ImpDtoTraSub as PopustOstalo,
         kup.ImpFactura - kup.impiva as OsnovicaZAPdv,  kup.impiva as UkupnoPDV, kup.ImpFactura as UkupnoRacun
@@ -127,10 +135,10 @@ class PrintController extends Controller
         inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
         inner join ttOtIntervencion I on i.Numinterno = kup.Numinterno
         inner join ttOTLinea L on l.NumIntOT=I.Numinterno and l.NumIntIntervencion=i.Intervencion
-        -- cross apply sys.objects o
+         cross apply sys.objects o
         --left join ttOTCargoLinea CL on cl.NumIntOT=l.NumIntOT and cl.NumIntCargo=kup.cargo and cl.NumIntIntervencion=i.intervencion
         where 1=1
-     --   and  object_id	 < 30
+       and  object_id	 < 5
         and l.CantidadHoras<>0
         and fak.NumIntFac = :id", ['id' => $id]));
 
@@ -152,7 +160,7 @@ class PrintController extends Controller
         $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'title' => $title, 'header' => $header])->render();
 
         $html_to_props = view("print.content.invoice_print", [
-            'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
+            'title' => $title, 'header' => $header, 'interventions' => $interventions, 'positions' => $positions, 'positions_sum' => $positions_sum
         ])->render();
 
         return view("print.render.render", [

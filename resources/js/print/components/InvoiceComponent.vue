@@ -263,6 +263,7 @@ export default {
       for (var i = 1; i <= page_count; i++) {
         var _elements = elements.filter(element => element.page == i);
         page = this.page_content.getElementById("page").cloneNode(true);
+        page.innerHTML = page.innerHTML.replace("#strana#", i);
         var content_node = page.querySelector("#content_row");
         _elements.map(element => {
           // broj strane
