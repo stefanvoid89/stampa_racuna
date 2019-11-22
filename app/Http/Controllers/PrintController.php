@@ -94,7 +94,10 @@ class PrintController extends Controller
     {
 
 
-        $header = collect(DB::select("SELECT   top 1  nal.NumOT as BrojNaloga, nal.AnoOT as GodinaNaloga,
+        $header = collect(DB::select("SELECT   top 1  nal.NumOT as BrojNaloga, nal.AnoOT as GodinaNaloga
+        ,case when nal.taller=2 then 'motrio'
+        else case when nal.marca='REN' then 'renault' when nal.marca='DAC' then 'dacia' when nal.marca='NIS' then 'nissan' else 'renault' end end as Marca
+        , case when nal.taller=2 then 'vidikovac' else 'sajmiste' end  as Lokacija,
         ltrim(rtrim(convert(char,nal.FechaAperturaOT,103))) + ' ' + right('0'+ltrim(rtrim(cast(nal.EntregaRealHora as int))),2)
         + ':'+ right('0'+ltrim(rtrim(cast(nal.EntregaRealMinuto as int))),2) as DatumPrijema
         ,convert(char,isnull(nal.EntregaPrevFecha,fak.fechaFactura ),103) as PredvidjeniDatumIzdavanja,
@@ -117,32 +120,45 @@ class PrintController extends Controller
         left  join tgpobla p on id=k.pobla
         where 1=1 and fak.NumIntFac = :id", ['id' => $id]))->first();
 
-        $interventions = collect(DB::select("SELECT distinct i.Numinterno, i.Referencia,cast(i.Descrip as varchar(max)) as Descrip ,i.TotalNetoIntervencion
-        from ttotCab nal
-        inner join ttotfac fak on nal.NumInterno=fak.numinterno
-        inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
-        inner join ttOtIntervencion I on i.Numinterno = kup.Numinterno
-        where 1=1
-        and fak.NumIntFac = :id", ['id' => $id]));
 
 
-        $positions =  collect(DB::select("SELECT i.numinterno,i.Referencia as SifraIntervencije,i.Descrip as OpisIntervencije, l.Referencia As Sifra, str(l.CantidadHoras,8,2) as Kolicina,
-        l.Descrip as Opis, l.PrecioUnitario as Cena,str(l.Descuento,8,2)  as Popust,l.impneto,i.TotalNetoIntervencion as UkupnoZahvatNeto,kup.ImpBrutoMO as UkupnoRadBruto,
-        kup.ImpBrutoRec as ukupnoDeoBruto,kup.ImpBrutoTraSub as UkupnoOstaloBruto, kup.ImpDtoMO as PopustUsluge,kup.ImpDtoRec as PopustDeo,kup.ImpDtoTraSub as PopustOstalo,
-        kup.ImpFactura - kup.impiva as OsnovicaZAPdv,  kup.impiva as UkupnoPDV, kup.ImpFactura as UkupnoRacun
-        from ttotCab nal
-        inner join ttotfac fak on nal.NumInterno=fak.numinterno
-        inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
-        inner join ttOtIntervencion I on i.Numinterno = kup.Numinterno
-        inner join ttOTLinea L on l.NumIntOT=I.Numinterno and l.NumIntIntervencion=i.Intervencion
-         cross apply sys.objects o
-        --left join ttOTCargoLinea CL on cl.NumIntOT=l.NumIntOT and cl.NumIntCargo=kup.cargo and cl.NumIntIntervencion=i.intervencion
-        where 1=1
-       and  object_id	 < 5
-        and l.CantidadHoras<>0
-        and fak.NumIntFac = :id", ['id' => $id]));
+        $positions =  collect(DB::select("SELECT * from (
+            select distinct  i.intervencion ,0 as RBR, i.Referencia as Sifra,cast(i.Descrip as varchar(max)) as Opis , str(0.00,8,2) as Kolicina,
+            str(i.TotalNetoIntervencion,8,2) as Cena,str(0.00,8,2) as Popust,str(0.00,8,2) as NetoCena ,
+            str(0.00,8,2) as impneto,str(0.00,8,2) as UkupnoRadBruto,str(0.00,8,2) as ukupnoDeoBruto,str(0.00,8,2) as UkupnoOstaloBruto, str(0.00 ,8,2) as PopustUsluge,
+            str(0.00,8,2) as PopustDeo,str(0.00,8,2) as PopustOstalo,str(0.00,8,2) as OsnovicaZAPdv,  str(0.00,8,2) as  UkupnoPDV, str(0.00,8,2)  as UkupnoRacun,
+            str(0.00,8,2) as RadNeto,str(0.00,8,2) as DeoNeto,str(0.00,8,2)as NetoOstalo
+            from ttotCab nal
+            inner join ttotfac fak on nal.NumInterno=fak.numinterno
+            inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
+            inner join ttOtIntervencion I on i.Numinterno = kup.Numinterno
+            inner join ttOTCargoInt ki on ki.NumIntOT=nal.NumInterno and ki.NumIntCargo=fak.NumIntCargo and ki.NumIntIntervencion=i.Intervencion
+           -- cross apply sys.objects o
+            where 1=1
+            --and  object_id	 < 30
+            and fak.NumIntFac  = :id
+            union all
+            SELECT	i.Intervencion,row_number() over(order by i.intervencion, l.referencia) as RBR, l.Referencia As Sifra,l.Descrip as Opis, format(l.CantidadHoras,'N2') as Kolicina,
+            format(l.PrecioUnitario,'N2') as Cena,format(l.Descuento,'N2')  as Popust, format(l.PrecioUnitario *(1-l.Descuento/100) ,'N2') as NetoCena ,
+            format(l.impneto,'N2') ,format(kup.ImpBrutoMO,'N2')  as UkupnoRadBruto,format(kup.ImpBrutoRec,'N2')  as ukupnoDeoBruto,format(kup.ImpBrutoTraSub,'N2')  as UkupnoOstaloBruto, format(kup.ImpDtoMO ,'N2') as PopustUsluge,
+            format(kup.ImpDtoRec,'N2')  as PopustDeo,format(kup.ImpDtoTraSub,'N2')  as PopustOstalo,format(kup.ImpFactura - kup.impiva,'N2')  as OsnovicaZAPdv,  format(kup.impiva,'N2')  as UkupnoPDV, format(kup.ImpFactura,'N2')  as UkupnoRacun,
+            format(kup.ImpBrutoMO-kup.ImpDtoMO,'N2') as RadNeto,format(kup.ImpBrutoRec-kup.ImpDtoRec,'N2') as DeoNeto,format(kup.ImpBrutoTraSub-kup.ImpDtoTraSub,'N2') as NetoOstalo
+            from ttotCab nal
+            inner join ttotfac fak on nal.NumInterno=fak.numinterno
+            inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo
+            inner join ttOTCargoInt ki on ki.NumIntOT=nal.NumInterno and ki.NumIntCargo=fak.NumIntCargo
+            inner join ttOTIntervencion i on i.intervencion=ki.NumIntIntervencion
+            inner join ttOTLinea L on l.NumIntOT=ki.NumIntOT and l.NumIntIntervencion=ki.NumIntIntervencion
+            -- cross apply sys.objects o
+            where 1=1
+            --  and  object_id	 < 30
+            and l.CantidadHoras<>0
+            and fak.NumIntFac = :id2
+            )q order by Intervencion, rbr", ['id' => $id, 'id2' => $id]));
 
-        $positions_sum = [];
+        $positions_sum = $positions->firstWhere('RBR', '1');
+
+        //  dd($positions_sum);
         // $positions = DB::select("SELECT 1 as one ", ['id' => $id]);
 
         // $positions_sum = DB::select("SELECT 1 as one", ['id' => $id]);
@@ -152,15 +168,15 @@ class PrintController extends Controller
 
         $title = "Stampa ugovora";
 
-        $marka = "nissan"; // renault motrio dacia
-        $location = "vidikovac"; // vidikovac
+        $marka = $header->Marca; // renault motrio dacia
+        $location = $header->Lokacija; // sajmiste
         $kome_faktura = "vlasnik"; // platioc
 
 
         $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'title' => $title, 'header' => $header])->render();
 
         $html_to_props = view("print.content.invoice_print", [
-            'title' => $title, 'header' => $header, 'interventions' => $interventions, 'positions' => $positions, 'positions_sum' => $positions_sum
+            'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
         ])->render();
 
         return view("print.render.render", [

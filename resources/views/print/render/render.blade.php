@@ -40,6 +40,11 @@
         div {
             font-size: 8pt;
         }
+
+        .border_bottom {
+            /* border-top: 1px solid black; */
+            padding-top: 10px;
+        }
     </style>
 </head>
 
