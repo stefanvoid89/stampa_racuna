@@ -17,7 +17,8 @@ class PrintController extends Controller
     {
         $_AnoFactura = $request->input('AnoFactura');
         $_Factura = $request->input('Factura');
-        $_FechaFactura = $request->input('FechaFactura');
+        $_FechaFacturaFrom = $request->input('FechaFacturaFrom');
+        $_FechaFacturaTo = $request->input('FechaFacturaTo');
         $_numot = $request->input('numot');
         $_AnoOT = $request->input('AnoOT');
         $_Recepcionista = $request->input('Recepcionista');
@@ -26,16 +27,32 @@ class PrintController extends Controller
         $_Cliente = $request->input('Cliente');
         $_taller = $request->input('taller');
 
+
+        $date_from = null;
+        $date_to = null;
+
+
+        if (\Datetime::createFromFormat("Y-m-d",  $_FechaFacturaFrom)) {
+            $date_from = $_FechaFacturaFrom;
+        }
+
+        if (\Datetime::createFromFormat("Y-m-d",  $_FechaFacturaTo)) {
+            $date_to = $_FechaFacturaTo;
+        }
+
+
         $invoices = DB::select("SELECT   top 100 f.NumIntFac as id,
-        AnoFactura,Factura,FechaFactura,n.numot, n.AnoOT,n.Recepcionista,n.Chasis,n.Matric,c.Cliente
-        ,rtrim(isnull(k.nombre,' '))+' '+isnull(k.Apellido1,'') as ClienteNombre ,c.ImpFactura
+        AnoFactura,Factura,convert(char,FechaFactura,104) as _FechaFactura,n.numot, n.AnoOT,n.Recepcionista,n.Chasis,n.Matric,
+        rtrim(ltrim(cast(c.Cliente as char)))  + ' - ' +  rtrim(isnull(k.nombre,' '))+' '+isnull(k.Apellido1,'') as Cliente
+        ,c.ImpFactura
         from ttOTFac f join ttotcab n on f.Numinterno=n.NumInterno
         inner join ttotCargo C on c.Cargo= f.NumIntCargo
         inner join tgCliente k on k.codigo = c.cliente
         where 1=1
         and ( AnoFactura = :_AnoFactura or :AnoFactura is null )
         and ( Factura = :_Factura or :Factura is null )
-        and ( FechaFactura = :_FechaFactura or :FechaFactura is null )
+        and (FechaFactura >=  :_date_from or :date_from is null)
+        and (FechaFactura <=    :_date_to or :date_to is null)
         and ( n.numot = :_numot or :numot is null )
         and ( n.AnoOT = :_AnoOT or :AnoOT is null )
         and ( n.Recepcionista = :_Recepcionista or :Recepcionista is null )
@@ -46,7 +63,8 @@ class PrintController extends Controller
         order by FechaFactura desc, NumOT desc  ", [
             '_AnoFactura' => $_AnoFactura,    'AnoFactura' => $_AnoFactura,
             '_Factura' => $_Factura,    'Factura' => $_Factura,
-            '_FechaFactura' => $_FechaFactura,    'FechaFactura' => $_FechaFactura,
+            '_date_from' => $date_from, 'date_from' => $date_from,
+            '_date_to' => $date_to, 'date_to' => $date_to,
             '_numot' => $_numot,    'numot' => $_numot,
             '_AnoOT' => $_AnoOT,    'AnoOT' => $_AnoOT,
             '_Recepcionista' => $_Recepcionista,    'Recepcionista' => $_Recepcionista,
@@ -58,6 +76,28 @@ class PrintController extends Controller
         ]);
 
         // dd($invoices);
+
+
+        $AnoFactura          = is_null($_AnoFactura) ? "" : $_AnoFactura;
+        $Factura          = is_null($_Factura) ? "" : $_Factura;
+        $FechaFacturaFrom          = is_null($_FechaFacturaFrom) ? "" : $_FechaFacturaFrom;
+        $FechaFacturaTo          = is_null($_FechaFacturaTo) ? "" : $_FechaFacturaTo;
+        $numot          = is_null($_numot) ? "" : $_numot;
+        $AnoOT          = is_null($_AnoOT) ? "" : $_AnoOT;
+        $Recepcionista          = is_null($_Recepcionista) ? "" : $_Recepcionista;
+        $Chasis          = is_null($_Chasis) ? "" : $_Chasis;
+        $Matric          = is_null($_Matric) ? "" : $_Matric;
+        $taller          = is_null($_taller) ? 0 : $_taller;
+
+
+
+        $Clientes = collect(DB::select("SELECT  codigo as anId, rtrim(ltrim(cast(codigo as char)))  + ' - ' +  rtrim(isnull(nombre,' '))+' '+isnull(Apellido1,'') as acSubject
+        from tgcliente where 1=1 and codigo = :_cliente", ['_cliente' => $_Cliente]));
+
+        $Cliente = $Clientes->first();
+
+        $tallers = collect(DB::select("SELECT 0 as anId, 'Svi' as acSubject union   all
+        SELECT Taller as anId, Descrip as acSubject from tgTaller where Taller in (1,2) and Emp = '001'"));
 
 
 
@@ -75,13 +115,14 @@ class PrintController extends Controller
         );
 
 
-
-
-        $prop_data = ['invoices' => $paginationData, 'prop_values' => collect([
-            'AnoFactura' => $_AnoFactura, 'Factura' => $_Factura, 'FechaFactura' => $_FechaFactura, 'numot' => $_numot,
-            'AnoOT' => $_AnoOT, 'Recepcionista' => $_Recepcionista, 'Chasis' => $_Chasis,
-            'Matric' => $_Matric,            'Cliente' => $_Cliente,  'taller' => $_taller
-        ])];
+        $prop_data = [
+            'invoices' => $paginationData, 'Clientes' => $Clientes, 'tallers' => $tallers,
+            'prop_values' => collect([
+                'AnoFactura' => $AnoFactura, 'Factura' => $Factura, 'FechaFacturaFrom' => $FechaFacturaFrom, 'FechaFacturaTo' => $FechaFacturaTo, 'numot' => $numot,
+                'AnoOT' => $AnoOT, 'Recepcionista' => $Recepcionista, 'Chasis' => $Chasis,
+                'Matric' => $Matric,            'Cliente' => $Cliente,  'taller' => $taller
+            ])
+        ];
 
         $title = "Stampa faktura";
 
@@ -182,5 +223,18 @@ class PrintController extends Controller
         return view("print.render.render", [
             'title' => $title, 'prop_data' => collect(['html_prop' => $html_to_props, 'page' => $page_html])
         ]);
+    }
+
+
+
+    public function fetch_subjects(Request $request)
+    {
+
+        $serch_term =  "%" . $request->input('search_term') . "%";
+
+        $subjects  = DB::select("SELECT  codigo as anId, rtrim(ltrim(cast(codigo as char)))  + ' - ' +  ltrim(rtrim(isnull(nombre,' ')))+' '+ltrim(rtrim(isnull(Apellido1,''))) as acSubject
+        from tgcliente where rtrim(ltrim(cast(codigo as char)))  + ' - ' +  ltrim(rtrim(isnull(nombre,' ')))+' '+ltrim(rtrim(isnull(Apellido1,'')))  like ? ", [$serch_term]);
+
+        return response()->json($subjects);
     }
 }

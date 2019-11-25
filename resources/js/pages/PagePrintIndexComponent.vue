@@ -15,7 +15,110 @@
             <table id="data" width="100%" cellspacing="2">
               <tbody>
                 <tr>
-                  <td></td>
+                  <td>Faktura:</td>
+                  <td>
+                    <input type="text" id="invoice" v-model="Factura" />
+                  </td>
+
+                  <td class="col2">Godina fakture:</td>
+                  <td class="col1">
+                    <select id="year_invoice" v-model="AnoFactura">
+                      <option v-for="_year in years" :key="_year" :value="_year">{{_year}}</option>
+                    </select>
+                  </td>
+
+                  <td>Radni nalog:</td>
+                  <td>
+                    <input type="text" id="wo" v-model="numot" />
+                  </td>
+
+                  <td class="col2">Godina radnog naloga:</td>
+                  <td class="col1">
+                    <select id="year_wo" v-model="AnoOT">
+                      <option v-for="_year in years" :key="_year" :value="_year">{{_year}}</option>
+                    </select>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Period fakture od:</td>
+                  <td>
+                    <input
+                      type="date"
+                      name="date_from"
+                      min="2000-01-01"
+                      max="2100-12-31"
+                      @keydown.stop="stop_backpace"
+                      :value="FechaFacturaFrom"
+                      @input="FechaFacturaFrom = $event.target.value"
+                    />
+                  </td>
+                  <td>Period fakture do:</td>
+                  <td>
+                    <input
+                      type="date"
+                      name="date_to"
+                      min="2000-01-01"
+                      max="2100-12-31"
+                      @keydown.stop="stop_backpace"
+                      :value="FechaFacturaTo"
+                      @input="FechaFacturaTo = $event.target.value"
+                    />
+                  </td>
+
+                  <td class="col2">Klijent:</td>
+                  <td class="col1">
+                    <div>
+                      <input
+                        list="subjects_list"
+                        id="subjects_list_id"
+                        :value="Cliente.acSubject"
+                        @input.stop="collect_subjects($event)"
+                        @paste="collect_subjects($event)"
+                        autocomplete="off"
+                        contenteditable
+                      />
+                      <datalist id="subjects_list">
+                        <option
+                          v-for="_Cliente in Clientes"
+                          :key="_Cliente.anId"
+                        >{{_Cliente.acSubject}}</option>
+                      </datalist>
+                    </div>
+                  </td>
+
+                  <td>Prijemni savetnik:</td>
+                  <td>
+                    <input type="text" name="user" id="user" v-model="Recepcionista" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Sasija:</td>
+                  <td>
+                    <input type="text" v-model="Chasis" />
+                  </td>
+                  <td>Registracija:</td>
+                  <td>
+                    <input type="text" v-model="Matric" />
+                  </td>
+                  <td>Lokacija:</td>
+                  <td>
+                    <select id="lokacija" v-model="taller">
+                      <option
+                        v-for="_taller in tallers"
+                        :key="_taller.anId"
+                        :value="_taller.anId"
+                      >{{_taller.acSubject}}</option>
+                    </select>
+                  </td>
+                  <td colspan="2" align="right">
+                    <button
+                      class="btn btn-warning border border-dark"
+                      id="search"
+                      @click.prevent="refresh_page_with_filter"
+                    >OK</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -68,7 +171,7 @@
                 <th>Sasija</th>
                 <th>Registarski broj</th>
                 <th>Klijent</th>
-                <th>Naziv</th>
+
                 <th>Vrednost</th>
 
                 <th></th>
@@ -78,14 +181,14 @@
               <tr v-for="invoice in invoices.data" :key="invoice.anRBr">
                 <td>{{ invoice.AnoFactura}}</td>
                 <td>{{ invoice.Factura }}</td>
-                <td>{{ invoice.FechaFactura }}</td>
+                <td>{{ invoice._FechaFactura }}</td>
                 <td>{{ invoice.numot }}</td>
                 <td>{{ invoice.AnoOT }}</td>
                 <td>{{ invoice.Recepcionista }}</td>
                 <td>{{ invoice.Chasis }}</td>
                 <td>{{ invoice.Matric }}</td>
                 <td>{{ invoice.Cliente }}</td>
-                <td>{{ invoice.ClienteNombre }}</td>
+
                 <td>{{ invoice.ImpFactura }}</td>
 
                 <td>
@@ -108,13 +211,108 @@ export default {
   data: function() {
     return {
       filter_visible: false,
-      invoices: this.$props.prop_data.invoices
+      invoices: this.$props.prop_data.invoices,
+      Clientes: this.$props.prop_data.Clientes,
+      tallers: this.$props.prop_data.tallers,
+      years: [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026,
+        2027,
+        2028,
+        2029,
+        2030
+      ],
+      Factura: this.$props.prop_data.prop_values.Factura,
+      numot: this.$props.prop_data.prop_values.numot,
+      Cliente: this.$props.prop_data.prop_values.Cliente || {},
+      FechaFacturaFrom: this.$props.prop_data.prop_values.FechaFacturaFrom,
+      FechaFacturaTo: this.$props.prop_data.prop_values.FechaFacturaTo,
+      AnoFactura: this.$props.prop_data.prop_values.AnoFactura,
+      AnoOT: this.$props.prop_data.prop_values.AnoOT,
+      taller: this.$props.prop_data.prop_values.taller,
+      Recepcionista: this.$props.prop_data.prop_values.Recepcionista,
+      Chasis: this.$props.prop_data.prop_values.Chasis,
+      Matric: this.$props.prop_data.prop_values.Matric
     };
   },
   methods: {
+    collect_subjects: function(event) {
+      var type = event.type;
+      var search =
+        type == "paste"
+          ? event.clipboardData.getData("text/plain")
+          : event.target.value;
+      if (search.length == 3 || (search.length >= 3 && type == "paste")) {
+        axios
+          .get("api/collect_subjects", {
+            params: {
+              search_term: search.toUpperCase().trim()
+            }
+          })
+          .then(response => {
+            this.Clientes = response.data;
+            if (type == "paste") this.set_subject(search);
+          })
+          .catch(err => {
+            console.log("ovo je greska", err.response);
+          });
+      }
+      this.set_subject(search);
+    },
+
+    set_subject: function(sub) {
+      var subject = this.Clientes.find(subject => subject.acSubject == sub);
+
+      this.$data.Cliente = subject ? subject : { anId: null, acSubject: sub };
+    },
+
     build_query_string: function() {
       var query_string_object = {};
-      //  if (this.brand != 0) query_string_object["brand"] = this.brand;
+
+      if (this.Cliente.anId) query_string_object["Cliente"] = this.Cliente.anId;
+
+      if (this.AnoFactura.length > 0)
+        query_string_object["AnoFactura"] = this.AnoFactura;
+
+      if (this.Factura.length > 0)
+        query_string_object["Factura"] = this.Factura;
+
+      if (this.Factura.length > 0)
+        query_string_object["Factura"] = this.Factura;
+
+      if (this.FechaFacturaFrom.length > 0)
+        query_string_object["FechaFacturaFrom"] = this.FechaFacturaFrom;
+
+      if (this.FechaFacturaTo.length > 0)
+        query_string_object["FechaFacturaTo"] = this.FechaFacturaTo;
+
+      if (this.numot.length > 0) query_string_object["numot"] = this.numot;
+
+      if (this.AnoOT.length > 0) query_string_object["AnoOT"] = this.AnoOT;
+
+      if (this.Recepcionista.length > 0)
+        query_string_object["Recepcionista"] = this.Recepcionista;
+
+      if (this.Chasis.length > 0) query_string_object["Chasis"] = this.Chasis;
+
+      if (this.Matric.length > 0) query_string_object["Matric"] = this.Matric;
+
+      if (this.taller != 0) query_string_object["taller"] = this.taller;
 
       var query_string = Object.keys(query_string_object)
         .map(key => {
@@ -130,7 +328,7 @@ export default {
 
     refresh_page_with_filter: function() {
       var query_string = this.build_query_string();
-      if (query_string.length) window.location.href = `//?${query_string}`;
+      if (query_string.length) window.location.href = `/?${query_string}`;
       else window.location.href = "/";
     },
 

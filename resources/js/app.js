@@ -1,11 +1,11 @@
-require("./utils.js")
+require("./utils.js");
 
-import moment from "moment"
+import moment from "moment";
 
-window.Vue = require("vue")
+window.Vue = require("vue");
 
 // automatska registracija svih komponenti
-const files = require.context("./", true, /\.vue$/i)
+const files = require.context("./", true, /\.vue$/i);
 files.keys().map(key =>
     Vue.component(
         key
@@ -14,13 +14,13 @@ files.keys().map(key =>
             .split(".")[0],
         files(key).default
     )
-)
+);
 
-Vue.prototype.moment = moment
+Vue.prototype.moment = moment;
 
 Vue.prototype.csrf_token = document.head.querySelector(
     'meta[name="csrf-token"]'
-).content
+).content;
 
 Vue.prototype.time_array = [
     "00:00",
@@ -119,11 +119,11 @@ Vue.prototype.time_array = [
     "23:15",
     "23:30",
     "23:45"
-]
+];
 
 Vue.prototype.time_array_full_hour = Vue.prototype.time_array.filter(time =>
     time.match(new RegExp("\\b(\\d*:00)\\b"))
-)
+);
 
 Vue.prototype.time_array_two_hours = [
     "02:00",
@@ -138,10 +138,10 @@ Vue.prototype.time_array_two_hours = [
     "20:00",
     "22:00",
     "00:00"
-]
+];
 
-window.axios.defaults.baseURL = process.env.MIX_APP_URL
+window.axios.defaults.baseURL = process.env.MIX_APP_URL;
 
 const app = new Vue({
     el: "#app"
-})
+});
