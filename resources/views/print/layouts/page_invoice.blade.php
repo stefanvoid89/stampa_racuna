@@ -55,7 +55,7 @@
 
                 </table>
 
-                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <table width="100%" border="0" style="margin-top:1px" cellspacing="0" cellpadding="0">
 
 
                     <tr>
@@ -145,7 +145,7 @@
                                     </td>
 
                                     <td colspan="2" style="font-size:16pt;">RAČUN</td>
-                                    <td colspan="3">{{$header->BrojRacuna}}</td>
+                                    <td colspan="2">{{$header->BrojRacuna}}</td>
                                 </tr>
                                 <tr>
                                     <td>
