@@ -148,7 +148,7 @@ class PrintController extends Controller
         nal.perJuridica as JelFirma, k.NIntraStat as Maticni,
         ltrim(rtrim(isnull(k.Nombre,'')+' '+isnull(k.apellido1,''))) as ImeKupcaSif, k.direccion as AdresaSif, k.CPostal as PostaSif, isnull(k.cif,'') as PibSif,
         k.perJuridica as JelFirmaSif, k.NIntraStat as MaticniSif,p.Descrip as MestoSif,
-        'RAČUN ' as OPisDokumena, fak.anoFactura as GodinaRačuna, ltrim(rtrim(cast(fak.anoFactura as char))) + '/' + ltrim(rtrim(cast(fak.Factura as char)))  as BrojRacuna, convert(char,fak.fechaFactura,103) as DatumRacuna,
+        case when fak.Abono = 1 then 'STORNO RAČUN' else 'RAČUN ' end as OPisDokumena, fak.anoFactura as GodinaRačuna, ltrim(rtrim(cast(fak.anoFactura as char))) + '/' + ltrim(rtrim(cast(fak.Factura as char)))  as BrojRacuna, convert(char,fak.fechaFactura,103) as DatumRacuna,
         kup.TallModoPago as NacinPalcanjaSifra,
         (select descrip  from tgModoPago where codigo=kup.TallModoPago) as NacinPlacanjaNaziv , kup.Cliente as KupacNaFakturi,
         (select numtel1 from tgcliente where codigo=kup.Cliente) as Telefon, convert(char,nal.FecMatricPrimera,103) as datumPrveReg,nal.km as Kilom, isnull(nal.numPrisma,'') as BrojPrijema,
@@ -179,11 +179,13 @@ class PrintController extends Controller
             --and  object_id	 < 30
             and fak.NumIntFac  = :id
             union all
-            SELECT	i.Intervencion,row_number() over(order by i.intervencion, l.referencia) as RBR, l.Referencia As Sifra,l.Descrip as Opis, format(l.CantidadHoras,'N2') as Kolicina,
+            SELECT	i.Intervencion,row_number() over(order by i.intervencion, l.referencia) as RBR, l.Referencia As Sifra,l.Descrip as Opis, format(l.CantidadHoras * (1-fak.abono * 2),'N2') as Kolicina,
             format(l.PrecioUnitario,'N2') as Cena,format(l.Descuento,'N2')  as Popust, format(l.PrecioUnitario *(1-l.Descuento/100) ,'N2') as NetoCena ,
-            format(l.impneto,'N2') ,format(kup.ImpBrutoMO,'N2')  as UkupnoRadBruto,format(kup.ImpBrutoRec,'N2')  as ukupnoDeoBruto,format(kup.ImpBrutoTraSub,'N2')  as UkupnoOstaloBruto, format(kup.ImpDtoMO ,'N2') as PopustUsluge,
-            format(kup.ImpDtoRec,'N2')  as PopustDeo,format(kup.ImpDtoTraSub,'N2')  as PopustOstalo,format(kup.ImpFactura - kup.impiva,'N2')  as OsnovicaZAPdv,  format(kup.impiva,'N2')  as UkupnoPDV, format(kup.ImpFactura,'N2')  as UkupnoRacun,
-            format(kup.ImpBrutoMO-kup.ImpDtoMO,'N2') as RadNeto,format(kup.ImpBrutoRec-kup.ImpDtoRec,'N2') as DeoNeto,format(kup.ImpBrutoTraSub-kup.ImpDtoTraSub,'N2') as NetoOstalo
+            format(l.impneto * (1-fak.abono * 2),'N2') ,format(kup.ImpBrutoMO * (1-fak.abono * 2),'N2')  as UkupnoRadBruto,format(kup.ImpBrutoRec * (1-fak.abono * 2),'N2')  as ukupnoDeoBruto,
+            format(kup.ImpBrutoTraSub * (1-fak.abono * 2),'N2')  as UkupnoOstaloBruto, format(kup.ImpDtoMO * (1-fak.abono * 2),'N2') as PopustUsluge,
+            format(kup.ImpDtoRec * (1-fak.abono * 2),'N2')  as PopustDeo,format(kup.ImpDtoTraSub * (1-fak.abono * 2),'N2')  as PopustOstalo,format((kup.ImpFactura - kup.impiva) * (1-fak.abono * 2),'N2')  as OsnovicaZAPdv,
+            format(kup.impiva * (1-fak.abono * 2),'N2')  as UkupnoPDV, format(kup.ImpFactura * (1-fak.abono * 2),'N2')  as UkupnoRacun,
+            format((kup.ImpBrutoMO-kup.ImpDtoMO) * (1-fak.abono * 2),'N2') as RadNeto,format((kup.ImpBrutoRec-kup.ImpDtoRec)* (1-fak.abono * 2),'N2') as DeoNeto,format((kup.ImpBrutoTraSub-kup.ImpDtoTraSub) * (1-fak.abono * 2),'N2') as NetoOstalo
             from ttotCab nal
             inner join ttotfac fak on nal.NumInterno=fak.numinterno
             inner join ttotCargo kup on kup.Numinterno=nal.NumInterno and kup.cargo=fak.NumIntCargo

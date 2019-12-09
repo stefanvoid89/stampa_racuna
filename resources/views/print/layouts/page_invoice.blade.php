@@ -137,14 +137,14 @@
                                             </tr>
 
                                             <tr>
-                                                <td> PIB: Matični broj: {{$header->MaticniSif}}</td>
+                                                <td> Matični broj: {{$header->MaticniSif}}</td>
                                             </tr>
                                         </table>
 
 
                                     </td>
 
-                                    <td colspan="2" style="font-size:16pt;">RAČUN</td>
+                                    <td colspan="2" style="font-size:16pt;">{{$header->OPisDokumena}}</td>
                                     <td colspan="2">{{$header->BrojRacuna}}</td>
                                 </tr>
                                 <tr>
