@@ -152,10 +152,10 @@ class PrintController extends Controller
         $marka = $header->Marca; // renault motrio dacia
         $location = $header->Lokacija; // sajmiste
         $kome_faktura = "vlasnik"; // platioc
+        $mesto_prometa= $header->Mesto;
+       
 
-
-        $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'title' => $title, 'header' => $header])->render();
-
+        $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'mesto_prometa'=>$mesto_prometa , 'title' => $title, 'header' => $header])->render();
         $html_to_props = view("print.content.invoice_print", [
             'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
         ])->render();

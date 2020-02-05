@@ -154,7 +154,7 @@
                                     </td>
                                     <td>
                                         <div style="text-align:left">Datum i mesto računa:</div>
-                                        <div style="text-align:center">{{$header->DatumRacuna}} Beograd</div>
+                                        <div style="text-align:center">{{$header->DatumRacuna}} {{$header->Mesto}}</div>
                                     </td>
                                     <td>
                                         <div style="text-align:left">Uslov plaćanja:</div>
@@ -266,6 +266,12 @@
 
                         <tr>
                             <td colspan="3"> <br> </td>
+                        </tr>
+                        <tr>
+                        @if( $header->BezPdv == "1")
+                            <td colspan="3"> Usluga ne podleže PDVu po Članu 12. Stav 4 Zakona o PDVu. </td>
+                        @endif
+                          
                         </tr>
                         <tr>
                             <td colspan="3"> Garantni rok za sve originalne delove i rad iznosi 12 meseci od datuma
