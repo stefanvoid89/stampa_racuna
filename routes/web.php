@@ -11,6 +11,6 @@
 |
 */
 
-Route::get('/', 'PrintController@index');
+Route::get('/print', 'PrintController@index');
 
-Route::get('/print/{id}', 'PrintController@print');
+Route::get('/print/print/{id}', 'PrintController@print');

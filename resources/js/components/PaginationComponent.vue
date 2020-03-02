@@ -2,7 +2,7 @@
   <ul class="pagination">
     <li class="pagination-item">
       <button
-        class="btn btn-warning border border-dark root-menu-item"
+        class="button_primary root-menu-item"
         type="button"
         @click="onClickFirstPage"
         :disabled="isInFirstPage"
@@ -12,7 +12,7 @@
 
     <li class="pagination-item">
       <button
-        class="btn btn-warning border border-dark root-menu-item"
+        class="button_primary root-menu-item"
         type="button"
         @click="onClickPreviousPage"
         :disabled="isInFirstPage"
@@ -22,7 +22,7 @@
 
     <li v-for="page in pages" :key="page.name" class="pagination-item">
       <button
-        class="btn btn-warning border border-dark root-menu-item"
+        class="button_primary root-menu-item"
         type="button"
         @click="onClickPage(page.name)"
         :disabled="page.isDisabled"
@@ -33,7 +33,7 @@
 
     <li class="pagination-item">
       <button
-        class="btn btn-warning border border-dark root-menu-item"
+        class="button_primary root-menu-item"
         type="button"
         @click="onClickNextPage"
         :disabled="isInLastPage"
@@ -43,7 +43,7 @@
 
     <li class="pagination-item">
       <button
-        class="btn btn-warning border border-dark root-menu-item"
+        class="button_primary root-menu-item"
         type="button"
         @click="onClickLastPage"
         :disabled="isInLastPage"

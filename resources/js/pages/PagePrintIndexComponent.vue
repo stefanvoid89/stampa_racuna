@@ -114,7 +114,7 @@
                   </td>
                   <td colspan="2" align="right">
                     <button
-                      class="btn btn-warning border border-dark"
+                      class="button_primary"
                       id="search"
                       @click.prevent="refresh_page_with_filter"
                     >OK</button>
@@ -123,9 +123,9 @@
               </tbody>
             </table>
           </form>
-          <div style="padding: 5px; background-color: rgb(255, 242, 187); margin-bottom: 10px;">
+          <div style="padding: 5px; background: rgb(181, 212, 236,0.3) none repeat scroll 0% 0%; border:solid 1px rgb(181, 212, 236,0.3) ;margin-bottom: 10px;box-shadow: 2px 2px 1px 0px #81b3df6e;">
             <button
-              class="btn btn-warning border border-dark"
+              class="button_primary"
               @click="filter_visible = !filter_visible"
             >Pretraga</button>
           </div>
@@ -193,7 +193,7 @@
 
                 <td>
                   <button
-                    class="btn btn-warning border border-dark"
+                    class="button_primary"
                     @click="print_invoice(invoice.id)"
                   >Stampaj</button>
                 </td>
@@ -345,7 +345,7 @@ export default {
       }
     },
     print_invoice: function(id) {
-      window.open(`/print/${id}`);
+      window.open(`/print/print/${id}`);
     }
   },
   computed: {

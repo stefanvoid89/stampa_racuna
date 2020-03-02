@@ -42,7 +42,7 @@
     </div>
     <form class="form-inline" action="/logout" method="POST"> <input style="min-width: 150px !important;
                                                     width: 150px !important;"
-            class="btn btn-warning border border-dark" type="submit" value="Odjavi se">
+            class="button_primary" type="submit" value="Odjavi se">
         @csrf
     </form>
 
@@ -55,11 +55,11 @@
     </table>
     </td>
     </tr>
-    {{-- <tr id="navbar-row">
+ <tr id="navbar-row">
                     <td>
                         <menu-component></menu-component>
                     </td>
-                </tr> --}}
+                </tr> 
     <tr id="main-row">
         <td>
             <div id="main_component">
