@@ -15,3 +15,10 @@ use Illuminate\Http\Request;
 
 
 Route::get('/collect_subjects', 'PrintController@fetch_subjects');
+
+
+Route::post('/warranty', 'WarrantyController@store_update');
+Route::put('/warranty/{id}', 'WarrantyController@store_update');
+
+
+Route::post('/fetch_icar_warranty_data', 'WarrantyController@fetch_data');
