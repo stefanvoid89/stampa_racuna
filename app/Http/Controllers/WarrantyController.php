@@ -23,9 +23,9 @@ class WarrantyController extends Controller
         inner join (SELECT codigo as id, descrip as type from ttOTStatus where descrip like '%reklamaci%') wt 
         on w.type_id = wt.id
         where 1=1
-        and ( subject = :_subject or :subject is null )
+        and ( subject like  :_subject  or :subject is null )
         order by w.id desc ", [
-            '_subject' => $subject,    'subject' => $subject
+            '_subject' => '%' . $subject . '%',    'subject' => $subject
 
         ]);
 
@@ -54,7 +54,7 @@ class WarrantyController extends Controller
         $title = "Pregled reklamacija";
 
 
-        return view('print_index', ["title" => $title, "prop_data" => collect($prop_data)]);
+        return view('warranty', ["title" => $title, "prop_data" => collect($prop_data)]);
     }
 
     public function create_edit(Request $request, $id = null)

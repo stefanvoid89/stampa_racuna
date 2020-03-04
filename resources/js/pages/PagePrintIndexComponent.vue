@@ -123,11 +123,10 @@
               </tbody>
             </table>
           </form>
-          <div style="padding: 5px; background: rgb(181, 212, 236,0.3) none repeat scroll 0% 0%; border:solid 1px rgb(181, 212, 236,0.3) ;margin-bottom: 10px;box-shadow: 2px 2px 1px 0px #81b3df6e;">
-            <button
-              class="button_primary"
-              @click="filter_visible = !filter_visible"
-            >Pretraga</button>
+          <div
+            style="padding: 5px; background: rgb(181, 212, 236,0.3) none repeat scroll 0% 0%; border:solid 1px rgb(181, 212, 236,0.3) ;margin-bottom: 10px;box-shadow: 2px 2px 1px 0px #81b3df6e;"
+          >
+            <button class="button_primary" @click="filter_visible = !filter_visible">Pretraga</button>
           </div>
         </td>
       </tr>
@@ -192,10 +191,7 @@
                 <td>{{ invoice.ImpFactura }}</td>
 
                 <td>
-                  <button
-                    class="button_primary"
-                    @click="print_invoice(invoice.id)"
-                  >Stampaj</button>
+                  <button class="button_primary" @click="print_invoice(invoice.id)">Stampaj</button>
                 </td>
               </tr>
             </tbody>
@@ -211,43 +207,15 @@ export default {
   data: function() {
     return {
       filter_visible: false,
-      invoices: this.$props.prop_data.invoices,
-      Clientes: this.$props.prop_data.Clientes,
-      tallers: this.$props.prop_data.tallers,
-      years: [
-        2010,
-        2011,
-        2012,
-        2013,
-        2014,
-        2015,
-        2016,
-        2017,
-        2018,
-        2019,
-        2020,
-        2021,
-        2022,
-        2023,
-        2024,
-        2025,
-        2026,
-        2027,
-        2028,
-        2029,
-        2030
-      ],
-      Factura: this.$props.prop_data.prop_values.Factura,
-      numot: this.$props.prop_data.prop_values.numot,
-      Cliente: this.$props.prop_data.prop_values.Cliente || {},
-      FechaFacturaFrom: this.$props.prop_data.prop_values.FechaFacturaFrom,
-      FechaFacturaTo: this.$props.prop_data.prop_values.FechaFacturaTo,
-      AnoFactura: this.$props.prop_data.prop_values.AnoFactura,
-      AnoOT: this.$props.prop_data.prop_values.AnoOT,
-      taller: this.$props.prop_data.prop_values.taller,
-      Recepcionista: this.$props.prop_data.prop_values.Recepcionista,
+      itmes: this.$props.prop_data.items,
+
+      ID: this.$props.prop_data.prop_values.id,
+      subject: this.$props.prop_data.prop_values.subject || {},
+      FechaFacturaFrom: this.$props.prop_data.prop_values.invoce_date,
+      FechaFacturaTo: this.$props.prop_data.prop_values.invoce_date,
+      car: this.$props.prop_data.prop_values.car,
       Chasis: this.$props.prop_data.prop_values.Chasis,
-      Matric: this.$props.prop_data.prop_values.Matric
+      type: this.$props.prop_data.prop_values.type
     };
   },
   methods: {
