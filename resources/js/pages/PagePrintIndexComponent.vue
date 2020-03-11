@@ -22,9 +22,7 @@
 
                   <td class="col2">Godina fakture:</td>
                   <td class="col1">
-                    <select id="year_invoice" v-model="AnoFactura">
-                      <option v-for="_year in years" :key="_year" :value="_year">{{_year}}</option>
-                    </select>
+                    <input id="year_invoice" v-model="AnoFactura" />
                   </td>
 
                   <td>Radni nalog:</td>
@@ -34,9 +32,7 @@
 
                   <td class="col2">Godina radnog naloga:</td>
                   <td class="col1">
-                    <select id="year_wo" v-model="AnoOT">
-                      <option v-for="_year in years" :key="_year" :value="_year">{{_year}}</option>
-                    </select>
+                    <input id="year_wo" v-model="AnoOT" />
                   </td>
                 </tr>
 
@@ -207,15 +203,29 @@ export default {
   data: function() {
     return {
       filter_visible: false,
-      itmes: this.$props.prop_data.items,
+      invoices: this.$props.prop_data.invoices,
+      Clientes: this.$props.prop_data.Clientes,
+      tallers: this.$props.prop_data.tallers,
+      AnoFactura: this.$props.prop_data.prop_values.AnnoFactura || "",
 
-      ID: this.$props.prop_data.prop_values.id,
+      Factura: this.$props.prop_data.prop_values.Facutra || "",
+      numot: this.$props.prop_data.prop_values.numot || "",
+
+      AnoOT: this.$props.prop_data.prop_values.AnoOT || "",
+      Recepcionista: this.$props.prop_data.prop_values.Recepcionista || "",
+      Chasis: this.$props.prop_data.prop_values.Chasis || "",
+
+      Matric: this.$props.prop_data.prop_values.Matric || "",
+      Cliente: this.$props.prop_data.prop_values.Clientes || "",
+      taller: this.$props.prop_data.prop_values.taller || "",
+
+      ID: this.$props.prop_data.prop_values.id || "",
       subject: this.$props.prop_data.prop_values.subject || {},
-      FechaFacturaFrom: this.$props.prop_data.prop_values.invoce_date,
-      FechaFacturaTo: this.$props.prop_data.prop_values.invoce_date,
+      FechaFacturaFrom: this.$props.prop_data.prop_values.invoce_date || "",
+      FechaFacturaTo: this.$props.prop_data.prop_values.invoce_date || "",
       car: this.$props.prop_data.prop_values.car,
-      Chasis: this.$props.prop_data.prop_values.Chasis,
-      type: this.$props.prop_data.prop_values.type
+      Chasis: this.$props.prop_data.prop_values.Chasis || "",
+      type: this.$props.prop_data.prop_values.type || ""
     };
   },
   methods: {
@@ -296,15 +306,15 @@ export default {
 
     refresh_page_with_filter: function() {
       var query_string = this.build_query_string();
-      if (query_string.length) window.location.href = `/?${query_string}`;
-      else window.location.href = "/";
+      if (query_string.length) window.location.href = `print/?${query_string}`;
+      else window.location.href = "print/";
     },
 
     onPageChange: function(page_id) {
       var query_string = this.build_query_string();
       if (query_string)
-        window.location.href = `/?${query_string}&page=${page_id}`;
-      window.location.href = `/?page=${page_id}`;
+        window.location.href = `print/?${query_string}&page=${page_id}`;
+      window.location.href = `print/?page=${page_id}`;
     },
 
     stop_backpace: function(event) {
