@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +13,8 @@
 |
 */
 
+
+Route::get('/', 'HomeController@index');
 
 Route::get('/warranty', 'WarrantyController@index');
 Route::get('/warranty/create', 'WarrantyController@create_edit');

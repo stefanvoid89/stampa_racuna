@@ -1,7 +1,7 @@
-<section id="page" class="sheet padding-5mm">
-    <table id="page_table" width="100%" style="height: 285mm">
+<section id="page" class="sheet padding-10mm">
+    <table id="page_table" style="height: 100%;width:100%">
         <tr>
-            <td id="header_row" style="height: 40mm">
+            <td id="header_row" style="height: 347px">
                 <table id="header" width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
                         <td align="left" width="30%">
@@ -250,7 +250,7 @@
         </tr>
 
         <tr>
-            <td id="footer_row" align="center" style="height: 10mm; font-size: 8pt;text-align:left; margin-top:20px">
+            <td id="footer_row" align="center" style="height: 155px; font-size: 8pt;text-align:left; margin-top:20px">
                 <div>
                     <table style=" font-size: 8pt;text-align:left;" width="100%">
                         <tr>
@@ -268,10 +268,10 @@
                             <td colspan="3"> <br> </td>
                         </tr>
                         <tr>
-                        @if( $header->BezPdv == "1")
+                            @if( $header->BezPdv == "1")
                             <td colspan="3"> Usluga ne podleže PDVu po Članu 12. Stav 4 Zakona o PDVu. </td>
-                        @endif
-                          
+                            @endif
+
                         </tr>
                         <tr>
                             <td colspan="3"> Garantni rok za sve originalne delove i rad iznosi 12 meseci od datuma

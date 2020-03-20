@@ -6,7 +6,11 @@ use Illuminate\Http\Request;
 
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Pagination\LengthAwarePaginator;
+use GuzzleHttp\Client;
+use GuzzleHttp;
+use Illuminate\Support\Facades\File;
 
 
 class PrintController extends Controller
@@ -15,6 +19,12 @@ class PrintController extends Controller
 
     public function index(Request $request)
     {
+        // $path = env("MAIL_ATTACH_DIR") . '281882.pdf';
+        // // dd($path);
+
+
+        // dd(File::exists($path));
+
         $_AnoFactura = $request->input('AnoFactura');
         $_Factura = $request->input('Factura');
         $_FechaFacturaFrom = $request->input('FechaFacturaFrom');
@@ -152,10 +162,10 @@ class PrintController extends Controller
         $marka = $header->Marca; // renault motrio dacia
         $location = $header->Lokacija; // sajmiste
         $kome_faktura = "vlasnik"; // platioc
-        $mesto_prometa= $header->Mesto;
-       
+        $mesto_prometa = $header->Mesto;
 
-        $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'mesto_prometa'=>$mesto_prometa , 'title' => $title, 'header' => $header])->render();
+
+        $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'mesto_prometa' => $mesto_prometa, 'title' => $title, 'header' => $header])->render();
         $html_to_props = view("print.content.invoice_print", [
             'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
         ])->render();
@@ -176,5 +186,55 @@ class PrintController extends Controller
         from tgcliente where rtrim(ltrim(cast(codigo as char)))  + ' - ' +  ltrim(rtrim(isnull(nombre,' ')))+' '+ltrim(rtrim(isnull(Apellido1,'')))  like ? ", [$serch_term]);
 
         return response()->json($subjects);
+    }
+
+
+    public function send_mail(Request $request)
+    {
+        // {"url":"http://miservice.hitauto/print/print/281810","file":"281810.pdf"}
+
+        $response = "OK";
+
+        $url = $request->input("url");
+        $file = $request->input("file");
+
+        $node_pdf_url = env("MAIL_NODE_PDF_SERVER_URL");
+        $path = env("MAIL_ATTACH_DIR") . $file;
+
+        // $path = env("MAIL_ATTACH_DIR") . '281882.pdf';
+        // return response()->json(['response' => $path]);
+        // return response()->json(['url' => $url, 'file' => $file, "url_pdf" => $node_pdf_url]);
+
+        $client = new Client();
+        $response = $client->post(
+            $node_pdf_url,
+            [
+                'json' =>
+                ['url' => $url, 'file' => $file]
+            ],
+            ['Content-Type' => 'application/json']
+        );
+
+        $response = json_decode($response->getBody(), true);
+
+
+        // return response()->json(['response' => $response]);
+
+
+        if (File::exists($path)) {
+
+            try {
+                Mail::raw('Faktura ' . $file, function ($message)  use ($path) {
+                    //   $message->from('us@example.com', 'Laravel');
+
+                    $message->to('smilosavljevic15@gmail.com');
+                    $message->attach($path);
+                });
+            } catch (\Exception $ex) {
+                $response    = $ex->getMessage();
+            }
+        } else $response = "Fajl nije kreiran, mail nece biti poslan";
+
+        return response()->json(['response' => $response]);
     }
 }

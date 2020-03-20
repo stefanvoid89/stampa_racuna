@@ -9,12 +9,6 @@
     <link href="{{URL::asset('/css/paper.css')}}" rel="stylesheet">
 
     <style>
-        @page {
-            size: A4
-        }
-
-
-
         @font-face {
             font-family: "RenaultLife-Bold";
             src: url("{{ URL::to('/fonts/RenaultLife-Bold.ttf')    }}") format("truetype");

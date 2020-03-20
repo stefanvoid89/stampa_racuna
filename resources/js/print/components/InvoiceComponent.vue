@@ -94,25 +94,40 @@ export default {
       var style = window.getComputedStyle(dom_element, null);
       var height = Math.floor(parseFloat(style.getPropertyValue("height"))); // dom_element.clientHeight;
 
+      console.log("visina strane " + height);
+
       var padding =
         Math.ceil(parseFloat(style.getPropertyValue("padding-top"))) +
         Math.ceil(parseFloat(style.getPropertyValue("padding-bottom")));
+
+      console.log("padding strane " + padding);
+
       height -= padding;
 
       var header = document.querySelector("#header_row");
       var header_height = document.querySelector("#header_row").clientHeight;
-      var header_style = window.getComputedStyle(header, null);
-      var style_header_height = header_style.height;
 
-      header_height += parseInt(
+      console.log("header height pre margina " + header_height);
+
+      let header_margina_top = parseInt(
         window.getComputedStyle(header).getPropertyValue("margin-top")
       );
 
-      header_height += parseInt(
+      console.log("header margina top " + header_margina_top);
+      header_height += header_margina_top;
+
+      let header_margina_bottom = parseInt(
         window.getComputedStyle(header).getPropertyValue("margin-bottom")
       );
+
+      console.log("header margina bottom " + header_margina_bottom);
+
+      header_height += header_margina_bottom;
+
       var footer = dom_element.querySelector("#footer_row");
       var footer_height = document.querySelector("#footer_row").clientHeight;
+
+      console.log("footer " + footer_height);
 
       footer_height += parseInt(
         window.getComputedStyle(footer).getPropertyValue("margin-top")
@@ -123,8 +138,8 @@ export default {
       );
 
       height = height - header_height - footer_height - 10; // 10 pixela koje ne mogu da uhvatim, a i bolje da ima manje mesta kako ne bi guralo futer
-      console.log("header height", header_height);
-      console.log("footer height", footer_height);
+      // console.log("header height", header_height);
+      // console.log("footer height", footer_height);
       console.log("final height is ", height);
       document.body.removeChild(dom_element);
 
@@ -161,6 +176,7 @@ export default {
         );
 
         if (element.classList.contains("footer")) {
+          // if (1 == 2) {
           //   console.log("footer");
           //   console.log(node_height);
           //   console.log(remained_page_height);

@@ -22,3 +22,5 @@ Route::put('/warranty/{id}', 'WarrantyController@store_update');
 
 
 Route::post('/fetch_icar_warranty_data', 'WarrantyController@fetch_data');
+
+Route::post('/send_mail', 'PrintController@send_mail');

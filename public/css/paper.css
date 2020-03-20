@@ -1,12 +1,13 @@
 @page {
     margin: 0;
+    size: A4 portrait;
 }
 body {
     margin: 0;
 }
 .sheet {
     margin: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: relative;
     box-sizing: border-box;
     page-break-after: always;

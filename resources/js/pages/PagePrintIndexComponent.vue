@@ -188,6 +188,7 @@
 
                 <td>
                   <button class="button_primary" @click="print_invoice(invoice.id)">Stampaj</button>
+                  <button class="button_primary" @click.prevent="send_mail(invoice.id)">posalji mail</button>
                 </td>
               </tr>
             </tbody>
@@ -229,6 +230,27 @@ export default {
     };
   },
   methods: {
+    send_mail: function(invoice_id) {
+      var url = "/api/send_mail";
+      var method = "POST";
+      var data = {
+        url: `http://miservice.hitauto/print/print/${invoice_id}`,
+        file: `${invoice_id}.pdf`
+      };
+
+      axios({
+        method,
+        url,
+        data
+      })
+        .then(response => {
+          console.log(response);
+        })
+        .catch(err => {
+          console.log("ovo je greska", err.response);
+        });
+    },
+
     collect_subjects: function(event) {
       var type = event.type;
       var search =
