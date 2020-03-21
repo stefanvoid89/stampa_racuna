@@ -231,10 +231,11 @@ export default {
   },
   methods: {
     send_mail: function(invoice_id) {
-      var url = "/api/send_mail";
-      var method = "POST";
+      const url = "/api/send_mail";
+      const method = "POST";
+      const baseUrl = window.axios.defaults.baseURL;
       var data = {
-        url: `http://miservice.hitauto/print/print/${invoice_id}`,
+        url: `${baseUrl}/print/print/${invoice_id}`,
         file: `${invoice_id}.pdf`
       };
 

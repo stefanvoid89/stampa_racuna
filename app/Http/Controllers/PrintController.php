@@ -206,6 +206,8 @@ class PrintController extends Controller
         // return response()->json(['url' => $url, 'file' => $file, "url_pdf" => $node_pdf_url]);
 
         $client = new Client();
+
+
         $response = $client->post(
             $node_pdf_url,
             [
