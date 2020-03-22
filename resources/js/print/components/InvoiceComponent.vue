@@ -1,5 +1,13 @@
 <template ></template>
 <script>
+/** UPUTSTVO ZA KORISCENJE ENGINA */
+/**   za svaki ispis prave se 3 odvojena view-a -> html_content je content strane , page_content je header i footer, render je view koji sadrzi engine componentu
+ *    render blade strana je univerzalna strana za sve ispise (moze da bude ako se od ispisa do ispisa ne menja format strane)
+ *    u controlleru se tim view-ima predaju variable i oni se renderovani predaju enginu kao html variable
+ *    u created metodi se html_content parsira kao html nodovi i pakuje u nodes array
+ *    page_content treba da ima  section tag sa tabelom koja ima 3 reda sledecih id vrednosti -> header_row, content_row i footer_row
+ *    u content_row se pakuje content koji engine uzima iz html_content-a, tj iz nodes array-a
+ */
 export default {
   props: { prop_data: Object, title: String },
   data: function() {
@@ -79,11 +87,6 @@ export default {
           return row.offsetHeight;
         })
         .reduce((a, b) => a + b, 0);
-
-      console.log(
-        "visina iz loopa je " + height_from_loop + "  dok je visina " + height
-      );
-
       return height;
     },
 
@@ -129,17 +132,24 @@ export default {
 
       console.log("footer " + footer_height);
 
-      footer_height += parseInt(
+      let footer_margin_top = parseInt(
         window.getComputedStyle(footer).getPropertyValue("margin-top")
       );
 
-      footer_height += parseInt(
+      console.log("footer margin top " + footer_margin_top);
+
+      footer_height += footer_margin_top;
+
+      let footer_margin_bottom = parseInt(
         window.getComputedStyle(footer).getPropertyValue("margin-bottom")
       );
 
-      height = height - header_height - footer_height - 10; // 10 pixela koje ne mogu da uhvatim, a i bolje da ima manje mesta kako ne bi guralo futer
-      // console.log("header height", header_height);
-      // console.log("footer height", footer_height);
+      console.log("footer margin bottom " + footer_margin_bottom);
+
+      footer_height += footer_margin_bottom;
+
+      height = height - header_height - footer_height;
+
       console.log("final height is ", height);
       document.body.removeChild(dom_element);
 
@@ -163,8 +173,8 @@ export default {
       // prvi deo punjenje arraya elements koji se posle renderuje na page-ove
 
       for (var index = 0; index < this.nodes.length; index++) {
-        // for (var index = 0; index < 1; index++) {
         var node_height = this.get_element_height(index);
+        // svaki element je tabela sa klasom parent koja moze da bude renderovana iscela ili podeljena na vise strana u okvirima headera i footera
         var element = this.nodes[index].cloneNode(true);
         console.log(
           "for index " +
@@ -175,13 +185,15 @@ export default {
             remained_page_height
         );
 
+        if (node_height > this.page_height) {
+          console.log("Renderovanje se ne moze nastaviti!!!!!!!!!!!!!!!!");
+          console.log(
+            `page height je ${this.page_height} a node je visint ${node_height}`
+          );
+          return;
+        }
+
         if (element.classList.contains("footer")) {
-          // if (1 == 2) {
-          //   console.log("footer");
-          //   console.log(node_height);
-          //   console.log(remained_page_height);
-          //   console.log(remained_page_height);
-          //   console.log("footer");
           if (remained_page_height > node_height) {
             this.nodes[index].style.marginTop =
               remained_page_height - node_height + "px";
@@ -198,34 +210,26 @@ export default {
           }
         } else {
           if (remained_page_height > node_height) {
-            console.log(
-              "remained page height is greater than node height and node is instered on page " +
-                page_counter
-            );
             elements.push({ node: this.nodes[index], page: page_counter });
             remained_page_height -= node_height;
           } else {
+            // sa new_element se "skidaju" redovi i dodaju na  _new_element ; prvo se _new_element brise do headera i onda se puni redovima iz new_element
             var new_element = element.cloneNode(true);
             var _new_element = element.cloneNode(true);
 
+            // _new_element_first_row je uveden jer chrome dodaje thead u tabele pa se ne zna da li tabela stvarno ima header
             if (_new_element.tHead.rows)
-              _new_element_first_row = _new_element.tHead.rows.length;
+              _new_element_first_row = _new_element.tHead.rows.length || 0;
 
             for (
               var i = _new_element.rows.length - 1;
-              i > _new_element_first_row - 1 && i > 0;
+              i >= _new_element_first_row && i >= 0;
               i--
             ) {
               _new_element.deleteRow(i);
             }
 
-            // _new_element_first_row = 1;
-
-            // if (_new_element.querySelector("th") == null) {
-            //   _new_element.deleteRow(0);
-            //   _new_element_first_row = 0;
-            // }
-
+            // page_for_measure sluzi za pakovanje contenta kako bi se videlo koliko mesta je ostalo na strani
             var page_for_measure = this.page_content
               .getElementById("page")
               .cloneNode(true);
@@ -235,13 +239,6 @@ export default {
             );
 
             var dom_element = content_node_for_measure.appendChild(new_element);
-
-            //   console.log(
-            //     "new element ima " +
-            //       new_element.rows.length +
-            //       " elemenata i visinu " +
-            //       new_element.offsetHeight
-            //   );
 
             for (var i = new_element.rows.length - 1; i >= 0; i--) {
               var height = Array.from(new_element.rows)
@@ -261,6 +258,8 @@ export default {
 
             this.$el.removeChild(page_for_measure);
 
+            // ovo je glavna caka -- this.nodes je lista svih parent nodova; ovde se "umece" novi node koji u ovoj istoj petlji dolazi naredni na obradu
+            // i tako fakticki rekurzivno dok se ne "potrosi"
             this.nodes.splice(index + 1, 0, _new_element);
             elements.push({ node: new_element, page: page_counter });
             page_counter++;

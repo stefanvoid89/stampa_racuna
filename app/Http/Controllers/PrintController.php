@@ -197,6 +197,7 @@ class PrintController extends Controller
 
         $url = $request->input("url");
         $file = $request->input("file");
+        $mail = $request->input("mail");
 
         $node_pdf_url = env("MAIL_NODE_PDF_SERVER_URL");
         $path = env("MAIL_ATTACH_DIR") . $file;
@@ -226,10 +227,11 @@ class PrintController extends Controller
         if (File::exists($path)) {
 
             try {
-                Mail::raw('Faktura ' . $file, function ($message)  use ($path) {
+                Mail::raw("Postovani,\r\nu prilogu faktura" . $file . "\r\nLp", function ($message)  use ($path, $mail, $file) {
                     //   $message->from('us@example.com', 'Laravel');
 
-                    $message->to('smilosavljevic15@gmail.com');
+                    $message->subject("Faktura " . $file);
+                    $message->to($mail);
                     $message->attach($path);
                 });
             } catch (\Exception $ex) {

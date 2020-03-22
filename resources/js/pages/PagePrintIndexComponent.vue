@@ -188,7 +188,11 @@
 
                 <td>
                   <button class="button_primary" @click="print_invoice(invoice.id)">Stampaj</button>
-                  <button class="button_primary" @click.prevent="send_mail(invoice.id)">posalji mail</button>
+                  <button
+                    v-if="view_send_mail_buttons"
+                    class="button_primary"
+                    @click.prevent="send_mail(invoice.id,invoice.Factura)"
+                  >posalji mail</button>
                 </td>
               </tr>
             </tbody>
@@ -226,17 +230,20 @@ export default {
       FechaFacturaTo: this.$props.prop_data.prop_values.invoce_date || "",
       car: this.$props.prop_data.prop_values.car,
       Chasis: this.$props.prop_data.prop_values.Chasis || "",
-      type: this.$props.prop_data.prop_values.type || ""
+      type: this.$props.prop_data.prop_values.type || "",
+      view_send_mail_buttons: false,
+      mail: "stefan.milosavljevic@hitauto.rs"
     };
   },
   methods: {
-    send_mail: function(invoice_id) {
+    send_mail: function(invoice_id, invoice) {
       const url = "/api/send_mail";
       const method = "POST";
       const baseUrl = window.axios.defaults.baseURL;
       var data = {
         url: `${baseUrl}/print/print/${invoice_id}`,
-        file: `${invoice_id}.pdf`
+        file: `${invoice}.pdf`,
+        mail: this.mail
       };
 
       axios({
