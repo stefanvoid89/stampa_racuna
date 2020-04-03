@@ -245,7 +245,7 @@ export default {
             if (response.data.errors.length > 0) {
               this.errors = response.data.errors;
             } else {
-              window.location.href = "/warranty";
+             window.location.href = "/warranty";
             }
           }
         })

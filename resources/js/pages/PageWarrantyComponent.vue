@@ -131,6 +131,7 @@
 
                 <td>
                   <button class="button_primary" @click="view_warranty(items.id)">Pregled</button>
+                  <button class="button_primary" @click="print_warranty(items.id)">Print</button>
                 </td>
               </tr>
             </tbody>
@@ -223,8 +224,11 @@ export default {
         event.preventDefault();
       }
     },
-    print_invoice: function(id) {
-      window.open(`/print/print/${id}`);
+    view_warranty: function(id) {
+      window.location.href = `/warranty/edit/${id}`;
+    },
+    print_warranty: function(id) {
+      window.open(`/warranty/print/${id}`);
     }
   },
   computed: {

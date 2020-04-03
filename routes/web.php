@@ -19,7 +19,7 @@ Route::get('/', 'HomeController@index');
 Route::get('/warranty', 'WarrantyController@index');
 Route::get('/warranty/create', 'WarrantyController@create_edit');
 Route::get('/warranty/edit/{id}', 'WarrantyController@create_edit');
-
+Route::get('/warranty/print/{id}', 'WarrantyController@print_warranty');
 
 Route::get('/print', 'PrintController@index');
 

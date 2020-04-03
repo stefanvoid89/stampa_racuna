@@ -219,4 +219,35 @@ class WarrantyController extends Controller
 
         return response()->json(['errors' => $errors]);
     }
+    public function print_warranty($id)
+    {
+        $items = collect(DB::select("SELECT w.id,w.subject,w.invoice,w.invoice_date, w.car,chasis,wt.type,phone ,
+            address, email, comment,type_id, w.date as DateWarr, clerk
+        from _Warranty w 
+        inner join (SELECT codigo as id, descrip as type from ttOTStatus where descrip like '%reklamaci%') wt 
+        on w.type_id = wt.id
+        where 1=1
+        and ( w.id= :id)
+        order by w.id desc ", ['id' => $id]))->first();
+
+        $var = "";
+
+        $title = "Stampa reklamacije - potvrda o reklamaciji";
+
+        // $marka = $header->Marca; // renault motrio dacia
+        // $location = $header->Lokacija; // sajmiste
+        // $kome_faktura = "vlasnik"; // platioc
+        // $mesto_prometa= $header->Mesto;
+
+
+        $page_html = view("print.layouts.page_warranty", ['title' => $title, 'items' => $items])->render();
+        $html_to_props = view("print.content.warranty_print", [
+            'title' => $title, 'items' => $items
+            //, 'positions' => $items, 'note' => $items,'customer' => $items
+        ])->render();
+
+        return view("print.render.render", [
+            'title' => $title, 'prop_data' => collect(['html_prop' => $html_to_props, 'page' => $page_html])
+        ]);
+    }
 }
