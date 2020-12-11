@@ -156,6 +156,43 @@
                         </tr>
                       </tbody>
                     </table>
+
+                     <br />
+                    <table  style="width:100%" class="obradjen">
+                      <thead>
+                                  
+                        <tr>
+                          <th colspan="6" >Opis potvrde</th>  </tr>
+                       
+                
+                      </thead>
+                     <tbody>  
+                        <tr>
+                          <td colspan="6"  class="label">
+                            <textarea v-model="comment_approved"  rows="5" style=";width: 100%;"></textarea>
+                          </td>
+                        </tr>
+   
+                      </tbody>
+    
+                        <tr>
+                          <td class="label">Status:</td>
+                          <td>
+                            <input class="width" type="text" v-model="approved_text" />
+                          </td>
+                            <td class="label">Reklamacija obradjena:</td>
+                            <input type="checkbox" id="checkbox" v-model="approved"  true-value="1" false-value="0">
+                             <label for="checkbox">{{ approved }}</label>
+
+                          <td class="label">Datum potvrde</td>
+                          <td>
+                            <input class="width" type="date" v-model="date_approved" />
+         
+                          </td>
+                         
+                        </tr>
+  
+                    </table>
                   </td>
                 </tr>
 
@@ -173,6 +210,8 @@
                   <div style="width:100%;display:flex;justify-content:space-around">
                     <button class="button_primary" @click.prevent="go_back ">Nazad</button>
                     <button class="button_primary" @click.prevent="store_data">Sacuvaj</button>
+                    <button class="button_primary" @click.prevent="print_rec">Print Zapisnik</button>
+                    <button class="button_primary" @click.prevent="print_dec">Print odluka</button>
                   </div>
                 </td>
 
@@ -206,7 +245,11 @@ export default {
       comment: this.$props.prop_data.prop_values.comment,
       type_id: this.$props.prop_data.prop_values.type_id,
       date: this.$props.prop_data.prop_values.date,
-      clerk: this.$props.prop_data.prop_values.clerk
+      clerk: this.$props.prop_data.prop_values.clerk,
+      comment_approved: this.$props.prop_data.prop_values.comment_approved,
+      approved: this.$props.prop_data.prop_values.approved,
+      date_approved: this.$props.prop_data.prop_values.date_approved,
+      approved_text: this.$props.prop_data.prop_values.approved_text
     };
   },
 
@@ -228,7 +271,11 @@ export default {
         comment: this.comment,
         type_id: this.type_id,
         date: this.date,
-        clerk: this.clerk
+        clerk: this.clerk,
+        approved: this.approved,
+        date_approved: this.date_approved,
+        approved_text: this.approved_text,
+        comment_approved: this.comment_approved
       };
       if (this.$data.id !== 0) {
         method = "PUT";
@@ -281,6 +328,10 @@ export default {
             this.invoice_date = response.data.invoice.invoice_date;
             this.type_id = response.data.invoice.type_id;
             this.clerk = response.data.invoice.clerk;
+            this.approved = response.data.invoice.approved;
+            this.approved_text = response.data.invoice.approved_text;
+            this.date_approved = response.data.invoice.date_approved;
+            this.comment_approved = response.data.invoice.comment_approved;
             this.errors = response.data.errors;
           }
         })
@@ -292,6 +343,15 @@ export default {
       window.location.href = "/warranty";
     }
   },
+  
+    print_rec: function(id) {
+      window.open(`/warranty/print_rec/${id}`);
+    },
+  
+   print_dec:  function(id) {
+      window.open(`/warranty/print_dec/${id}`);
+    },
+
   computed: {},
   created: function() {}
 };

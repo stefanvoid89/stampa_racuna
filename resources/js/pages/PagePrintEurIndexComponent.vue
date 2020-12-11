@@ -4,7 +4,6 @@
       <tr>
         <td class="naslov">{{title}}</td>
       </tr>
-      
       <tr>
         <td>
           <hr size="1" color="#D2D2D2" />
@@ -189,7 +188,7 @@
 
                 <td>
                   <button class="button_primary" @click="print_invoice(invoice.id)">Stampaj</button>
-                   <button class="button_primary" @click="print_invoiceEUR(invoice.id)">Stampa-EUR</button>
+                   <button class="button_primary" @click="print_invoiceEUR(invoice.id)">Stampaj EUR</button>
                   <button
                     v-if="view_send_mail_buttons"
                     class="button_primary"
@@ -356,10 +355,11 @@ export default {
     },
     print_invoice: function(id) {
       window.open(`/print/print/${id}`);
-    },
+    }
+  ,
     print_invoiceEUR: function(id) {
       window.open(`/printEUR/print/${id}`);
-    }
+    }  
   },
   computed: {
     display_filter: function() {
@@ -367,6 +367,7 @@ export default {
     }
   }
 };
+    
 </script>
 
 

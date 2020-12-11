@@ -11,7 +11,10 @@ class HomeController extends Controller
     public function index()
     {
 
+        $title = "Hit auto miservice pocetna ";
 
-        dd(storage_path('app'));
+
+        return view('master', ["title" => $title]);
+        //dd(storage_path('app'));
     }
 }

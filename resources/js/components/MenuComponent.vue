@@ -31,6 +31,16 @@ export default {
          
               link: "/calculator"
             },
+            {
+          label: "REKLAMACIJE",
+         
+              link: "/warranty"
+            },
+                {
+          label: "CRM",
+         
+              link: "/crm"
+            },
       ]
     };
   },

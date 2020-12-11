@@ -23,4 +23,8 @@ Route::get('/warranty/print/{id}', 'WarrantyController@print_warranty');
 
 Route::get('/print', 'PrintController@index');
 
+Route::get('/printEUR/print/{id}', 'PrintController@printEUR');
 Route::get('/print/print/{id}', 'PrintController@print');
+
+
+Route::get('/crm', 'CrmController@index');

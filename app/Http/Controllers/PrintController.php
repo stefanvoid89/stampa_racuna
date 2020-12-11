@@ -51,7 +51,7 @@ class PrintController extends Controller
         }
 
 
-        $invoices = DB::select("SELECT   top 100 f.NumIntFac as id,
+        $invoices = DB::connection('sqlsrv')->select("SELECT   top 100 f.NumIntFac as id,
         AnoFactura,Factura,convert(char,FechaFactura,104) as _FechaFactura,n.numot, n.AnoOT,n.Recepcionista,n.Chasis,n.Matric,
         rtrim(ltrim(cast(c.Cliente as char)))  + ' - ' +  rtrim(isnull(k.nombre,' '))+' '+isnull(k.Apellido1,'') as Cliente
         ,c.ImpFactura
@@ -130,7 +130,7 @@ class PrintController extends Controller
             'prop_values' => collect([
                 'AnoFactura' => $AnoFactura, 'Factura' => $Factura, 'FechaFacturaFrom' => $FechaFacturaFrom, 'FechaFacturaTo' => $FechaFacturaTo, 'numot' => $numot,
                 'AnoOT' => $AnoOT, 'Recepcionista' => $Recepcionista, 'Chasis' => $Chasis,
-                'Matric' => $Matric,            'Cliente' => $Cliente,  'taller' => $taller
+                'Matric' => $Matric,'Cliente' => $Cliente,  'taller' => $taller
             ])
         ];
 
@@ -175,6 +175,40 @@ class PrintController extends Controller
         ]);
     }
 
+
+    public function printEur($id)
+    {
+        $header = collect(DB::select("EXEC _MiServiceHeader :id", ['id' => $id]))->first();
+
+        $positions =  collect(DB::select("EXEC _MiServicePositionsEUR :id", ['id' => $id]));
+
+        $positions_sum = $positions->firstWhere('RBR', '1');
+
+        //  dd($positions_sum);
+        // $positions = DB::select("SELECT 1 as one ", ['id' => $id]);
+
+        // $positions_sum = DB::select("SELECT 1 as one", ['id' => $id]);
+
+
+        $var = "";
+
+        $title = "Stampa ugovora";
+
+        $marka = $header->Marca; // renault motrio dacia
+        $location = $header->Lokacija; // sajmiste
+        $kome_faktura = "vlasnik"; // platioc
+        $mesto_prometa = $header->Mesto;
+
+
+        $page_html = view("print.layouts.page_invoiceEur", ['marka' => $marka, 'location' => $location, 'mesto_prometa' => $mesto_prometa, 'title' => $title, 'header' => $header])->render();
+        $html_to_props = view("print.content.invoiceEUR_print", [
+            'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
+        ])->render();
+
+        return view("print.render.render", [
+            'title' => $title, 'prop_data' => collect(['html_prop' => $html_to_props, 'page' => $page_html])
+        ]);
+    }
 
 
     public function fetch_subjects(Request $request)

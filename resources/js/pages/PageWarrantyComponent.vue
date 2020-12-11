@@ -115,7 +115,7 @@
                 <th>car</th>
                 <th>Sasija</th>
                 <th>Tip</th>
-
+                <th>Status</th>
                 <th></th>
               </tr>
             </thead>
@@ -128,7 +128,7 @@
                 <td>{{ items.car }}</td>
                 <td>{{ items.chasis }}</td>
                 <td>{{ items.type }}</td>
-
+                 <td>{{ items.approved_text }}</td>
                 <td>
                   <button class="button_primary" @click="view_warranty(items.id)">Pregled</button>
                   <button class="button_primary" @click="print_warranty(items.id)">Print</button>
@@ -154,7 +154,11 @@ export default {
       subject: this.$props.prop_data.prop_values.subject,
       car: this.$props.prop_data.prop_values.car,
       chasis: this.$props.prop_data.prop_values.chasis,
-      type: this.$props.prop_data.prop_values.type
+      type: this.$props.prop_data.prop_values.type,
+      approved: this.$props.prop_data.prop_values.approved,
+      comment_approved: this.$props.prop_data.prop_values.comment_approved,
+      date_approved: this.$props.prop_data.prop_values,date_approved,
+      approved_text: this.$props.prop_data.prop_values.approved_text
     };
   },
   methods: {
