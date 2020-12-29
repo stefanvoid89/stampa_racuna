@@ -30,3 +30,4 @@ Route::get('/print/print/{id}', 'PrintController@print');
 Route::get('/crm', 'CrmController@index');
 
 Route::get('/test', 'HomeController@generateXML');
+Route::get('/test1', 'HomeController@testModel');
