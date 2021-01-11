@@ -24,129 +24,41 @@ class HomeController extends Controller
 
 
 
-    public function generateXML()
+    public function generateXML(Request $request)
     {
 
-        $sql_subjects = "SELECT * FROM subjects";
-        $sql_items = "SELECT * FROM invoices";
-        $subjects = DB::connection('sqlsrv2')->getPdo()->query($sql_subjects)->fetchAll(\PDO::FETCH_ASSOC);
-       $invoices = DB::connection('sqlsrv2')->getPdo()->query($sql_items)->fetchAll(\PDO::FETCH_ASSOC);
+        $sql_invoices = "SELECT NumInterno as id,Factura as faktura,FechaFactura as datum,Cliente as subject_id,chasis 
+        from icar_proc.[dbo].[ICAR_vAM_PrometServiceOut] where 1=1
+        -- and numinterno in (288692,287662)";
+        $sql_positions = "SELECT NumIntOT as invoice_id,anQty as qty,acIdent as ident,acName as name,PrecioUnitario as price 
+        from icar_proc.[dbo].[ICAR_vAM_PrometServiceOutNo] where 1=1
+        -- and numintot in (288692,287662)";
+        $invoices = DB::connection('icar')->getPdo()->query($sql_invoices)->fetchAll(\PDO::FETCH_ASSOC);
+        $positions = DB::connection('icar')->getPdo()->query($sql_positions)->fetchAll(\PDO::FETCH_ASSOC);
 
-    //   dd($invoices);
+        foreach ($invoices as &$invoice) {
 
-       foreach($subjects as &$subject){
-
-        // echo '<br>from loop subject_id  ';
-        // print_r($subject["id"]);
-        // echo '<br>';
-
-
-        $temp = array_filter($invoices,function($inv) use($subject){
-           // print_r($inv);
-            // echo '<br>inv subject_id';
-            // print_r($inv['subject_id'] );
+            // echo '<br>from loop subject_id  ';
+            // print_r($subject["id"]);
             // echo '<br>';
-            // echo   $inv['subject_id'] == $subject['id'];
-            // echo '<br>';
-            return $inv['subject_id'] == $subject['id'];
-        });
-//  echo '<br>';
-//         print_r($temp);
-//         echo '<br>';
-//         print_r(count($temp));
-
-        if(count($temp) > 0) $subject['items']= $temp;
-        // echo '<br>';
-        // print_r($subject);
-        // echo '<br>';
-
-       }
-       $subjects = ['subjects'=>$subjects];
-       echo '<br>';
-       var_dump($subjects);
-       echo '<br>';
-
-               $array = [
-            "good guys" => [
-                'Good guy' => [
-                    [
-                        'name' => 'Luke Skywalker',
-                        'weapon' => 'Lightsaber'
-                    ],
-                    [
-                        'name' => 'Luke sdfdsf',
-                        'weapon' => 'sdfdsf'
-                    ],
-                    [
-                        'name' => 'Luke nesto nesto',
-                        'weapon' => 'Lightsfsdfaber'
-                    ],
-                ]
-                ]];
-
-        echo '<br>';
-        var_dump($array);
-        echo '<br>';
-
-      die();
-
-       //  $items = DB::select($sql);
-
-        // $arr = [1,2,3];
-        // print_r($arr);
-        // echo '<br/>';
-        // print_r($items);
 
 
-        // dd(array_map('is_int', array_keys($items)));
+            $temp = array_filter($positions, function ($pos) use ($invoice) {
 
-        // dd(array_unique(array_map('is_int', array_keys($items))) === [true]);
-
-
-
-        //   $result = ArrayToXml::convert(['__numeric' => $items]);
-
-        // $result = ArrayToXml::convert($items);
-        // dd($result);
-        // die();
+                return $pos['invoice_id'] == $invoice['id'];
+            });
 
 
-        //  dd($items);
-
-        $arrayToXml = new ArrayToXml($subjects);
-        $result = $arrayToXml->prettify()->toXml();
-
-        dd($result);
-        //   /  dd($array);
-    }
-
-    public function testModel(Request $request){
-
-       // $invoices = Subject::find(1)->invoices()->get();
-
-        $invoices = Subject::with('invoices')->get();
-
-        $items = $invoices->toArray();
-
-
-        // $arrayToXml = new ArrayToXml($items);
-        // $result = $arrayToXml->prettify()->toXml();
-
-        // dd($result);
-
-
-
-
-        print_r($invoices->toArray());
-        dd($invoices);
-
-
-
-        foreach($invoices as $invoice){
-            dd($invoice->id);
+            if (count($temp) > 0) $invoice['Stavke']['Stavka'][] = $temp;
         }
 
+        $invoices = ["Dokument" => $invoices];
 
-      //  dd($invoices->first());
+        $arrayToXml = new ArrayToXml($invoices, 'Dokumenti', true, 'UTF-8');
+
+        $result = $arrayToXml->prettify()->toXml();
+
+        //dd(gettype($result));
+        dd($result);
     }
 }

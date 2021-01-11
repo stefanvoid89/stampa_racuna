@@ -76,6 +76,7 @@ return [
             'prefix_indexes' => true,
             'schema' => 'public',
             'sslmode' => 'prefer',
+
         ],
 
         'sqlsrv' => [
@@ -89,6 +90,7 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            'options' => [PDO::SQLSRV_ATTR_FORMAT_DECIMALS => true]
         ],
         'sqlsrv2' => [
             'driver' => 'sqlsrv',
@@ -101,6 +103,21 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
+            'options' => [PDO::SQLSRV_ATTR_FORMAT_DECIMALS => true]
+        ],
+
+        'icar' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_ICAR_URL'),
+            'host' => env('DB_ICAR_HOST', 'localhost'),
+            'port' => env('DB_ICAR_PORT', '1433'),
+            'database' => env('DB_ICAR_DATABASE', 'forge'),
+            'username' => env('DB_ICAR_USERNAME', 'forge'),
+            'password' => env('DB_ICAR_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'options' => [PDO::SQLSRV_ATTR_FORMAT_DECIMALS => true]
         ],
     ],
 
@@ -134,7 +151,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

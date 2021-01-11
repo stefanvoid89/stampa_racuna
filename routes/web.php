@@ -29,5 +29,5 @@ Route::get('/print/print/{id}', 'PrintController@print');
 
 Route::get('/crm', 'CrmController@index');
 
-Route::get('/test', 'HomeController@generateXML');
-Route::get('/test1', 'HomeController@testModel');
+Route::get('/test', 'PrintController@test');
+Route::get('/test1', 'HomeController@generateXML');

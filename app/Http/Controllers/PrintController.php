@@ -51,7 +51,7 @@ class PrintController extends Controller
         }
 
 
-        $invoices = DB::connection('sqlsrv')->select("SELECT   top 100 f.NumIntFac as id,
+        $invoices = DB::connection('icar')->select("SELECT   top 100 f.NumIntFac as id,
         AnoFactura,Factura,convert(char,FechaFactura,104) as _FechaFactura,n.numot, n.AnoOT,n.Recepcionista,n.Chasis,n.Matric,
         rtrim(ltrim(cast(c.Cliente as char)))  + ' - ' +  rtrim(isnull(k.nombre,' '))+' '+isnull(k.Apellido1,'') as Cliente
         ,c.ImpFactura
@@ -101,12 +101,12 @@ class PrintController extends Controller
 
 
 
-        $Clientes = collect(DB::select("SELECT  codigo as anId, rtrim(ltrim(cast(codigo as char)))  + ' - ' +  rtrim(isnull(nombre,' '))+' '+isnull(Apellido1,'') as acSubject
+        $Clientes = collect(DB::connection('icar')->select("SELECT  codigo as anId, rtrim(ltrim(cast(codigo as char)))  + ' - ' +  rtrim(isnull(nombre,' '))+' '+isnull(Apellido1,'') as acSubject
         from tgcliente where 1=1 and codigo = :_cliente", ['_cliente' => $_Cliente]));
 
         $Cliente = $Clientes->first();
 
-        $tallers = collect(DB::select("SELECT 0 as anId, 'Svi' as acSubject union   all
+        $tallers = collect(DB::connection('icar')->select("SELECT 0 as anId, 'Svi' as acSubject union   all
         SELECT Taller as anId, Descrip as acSubject from tgTaller where Taller in (1,2) and Emp = '001'"));
 
 
@@ -130,7 +130,7 @@ class PrintController extends Controller
             'prop_values' => collect([
                 'AnoFactura' => $AnoFactura, 'Factura' => $Factura, 'FechaFacturaFrom' => $FechaFacturaFrom, 'FechaFacturaTo' => $FechaFacturaTo, 'numot' => $numot,
                 'AnoOT' => $AnoOT, 'Recepcionista' => $Recepcionista, 'Chasis' => $Chasis,
-                'Matric' => $Matric,'Cliente' => $Cliente,  'taller' => $taller
+                'Matric' => $Matric, 'Cliente' => $Cliente,  'taller' => $taller
             ])
         ];
 
@@ -143,36 +143,18 @@ class PrintController extends Controller
 
     public function print($id)
     {
-        $header = collect(DB::select("EXEC _MiServiceHeader :id", ['id' => $id]))->first();
+        $client = new Client();
 
-        $positions =  collect(DB::select("EXEC _MiServicePositions :id", ['id' => $id]));
+        $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
 
-        $positions_sum = $positions->firstWhere('RBR', '1');
-
-        //  dd($positions_sum);
-        // $positions = DB::select("SELECT 1 as one ", ['id' => $id]);
-
-        // $positions_sum = DB::select("SELECT 1 as one", ['id' => $id]);
+        $url = "http://mirent.report/pdf?hash=$hash&params[id]=$id&report=invoice";
 
 
-        $var = "";
-
-        $title = "Stampa ugovora";
-
-        $marka = $header->Marca; // renault motrio dacia
-        $location = $header->Lokacija; // sajmiste
-        $kome_faktura = "vlasnik"; // platioc
-        $mesto_prometa = $header->Mesto;
-
-
-        $page_html = view("print.layouts.page_invoice", ['marka' => $marka, 'location' => $location, 'mesto_prometa' => $mesto_prometa, 'title' => $title, 'header' => $header])->render();
-        $html_to_props = view("print.content.invoice_print", [
-            'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
-        ])->render();
-
-        return view("print.render.render", [
-            'title' => $title, 'prop_data' => collect(['html_prop' => $html_to_props, 'page' => $page_html])
-        ]);
+        $_response = $client->get($url);
+        $content = $_response->getBody()->getContents();
+        $response = response()->make($content, 200);
+        $response->header('Content-Type', 'application/pdf'); // change this to the download content type.
+        return $response;
     }
 
 
@@ -225,6 +207,44 @@ class PrintController extends Controller
 
     public function send_mail(Request $request)
     {
+
+        $id = $request->input("id");
+        $file = $request->input("file");
+        $mail = $request->input("mail");
+
+        $client = new Client();
+
+        $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
+
+        $url = "http://mirent.report/pdf?hash=$hash&params[id]=$id&report=invoice";
+
+
+        $_response = $client->get($url);
+        $content = $_response->getBody()->getContents();
+        // $response = response()->make($content, 200);
+        // $response->header('Content-Type', 'application/pdf'); // change this to the download content type.
+        // return $response;
+
+        if (1 == 1) {
+
+            try {
+                Mail::raw("Postovani,\r\nu prilogu faktura" . $file . "\r\nLp", function ($message)  use ($content, $mail, $file) {
+                    //   $message->from('us@example.com', 'Laravel');
+
+                    $message->subject("Faktura " . $file);
+                    $message->to($mail);
+                    $message->attachData($content, $file, ["mime" => 'application/pdf']);
+                });
+            } catch (\Exception $ex) {
+                $response    = $ex->getMessage();
+            }
+        } else $response = "Fajl nije kreiran, mail nece biti poslan";
+
+        return response()->json(['response' => $_response]);
+    }
+
+    public function send_mail_old(Request $request)
+    {
         // {"url":"http://miservice.hitauto/print/print/281810","file":"281810.pdf"}
 
         $response = "OK";
@@ -274,5 +294,17 @@ class PrintController extends Controller
         } else $response = "Fajl nije kreiran, mail nece biti poslan";
 
         return response()->json(['response' => $response]);
+    }
+
+    public function test()
+    {
+        $client = new Client();
+
+
+        $_response = $client->get("http://mirent.report/pdf?hash=ZKfPuxUDXrS82JkqPY8STlJOQhmcWVebhc3QXVmM3IUNSTCVPv&params[id]=296878&report=invoice");
+        $content = $_response->getBody()->getContents();
+        $response = response()->make($content, 200);
+        $response->header('Content-Type', 'application/pdf'); // change this to the download content type.
+        return $response;
     }
 }
