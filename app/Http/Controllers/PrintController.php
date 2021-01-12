@@ -147,7 +147,9 @@ class PrintController extends Controller
 
         $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
 
-        $url = "http://mirent.report/pdf?hash=$hash&params[id]=$id&report=invoice";
+        $baseUrl = env("REPORT_ENGINE_BASE_URL");
+
+        $url = "$baseUrl/pdf?hash=$hash&params[id]=$id&report=invoice";
 
 
         $_response = $client->get($url);
@@ -216,7 +218,9 @@ class PrintController extends Controller
 
         $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
 
-        $url = "http://mirent.report/pdf?hash=$hash&params[id]=$id&report=invoice";
+        $baseUrl = env("REPORT_ENGINE_BASE_URL");
+
+        $url = "$baseUrl/pdf?hash=$hash&params[id]=$id&report=invoice";
 
 
         $_response = $client->get($url);
