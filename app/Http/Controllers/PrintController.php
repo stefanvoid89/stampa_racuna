@@ -143,13 +143,16 @@ class PrintController extends Controller
 
     public function print($id)
     {
+        $currency = request()->input('currency');
         $client = new Client();
 
         $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
 
         $baseUrl = env("REPORT_ENGINE_BASE_URL");
 
-        $url = "$baseUrl/pdf?hash=$hash&params[id]=$id&report=invoice";
+        $url = "$baseUrl/pdf?hash=$hash&params[id]=$id&report=invoice&params[currency]=$currency";
+
+        //    dd($url);
 
 
         $_response = $client->get($url);
@@ -229,20 +232,21 @@ class PrintController extends Controller
         // $response->header('Content-Type', 'application/pdf'); // change this to the download content type.
         // return $response;
 
-        if (1 == 1) {
 
-            try {
-                Mail::raw("Postovani,\r\nu prilogu faktura" . $file . "\r\nLp", function ($message)  use ($content, $mail, $file) {
-                    //   $message->from('us@example.com', 'Laravel');
 
-                    $message->subject("Faktura " . $file);
-                    $message->to($mail);
-                    $message->attachData($content, $file, ["mime" => 'application/pdf']);
-                });
-            } catch (\Exception $ex) {
-                $response    = $ex->getMessage();
-            }
-        } else $response = "Fajl nije kreiran, mail nece biti poslan";
+        try {
+            Mail::raw("Postovani,\r\nu prilogu faktura" . $file . "\r\nLp", function ($message)  use ($content, $mail, $file) {
+                //   $message->from('us@example.com', 'Laravel');
+
+                $message->subject("Faktura " . $file);
+                $message->to($mail);
+                $message->attachData($content, $file, ["mime" => 'application/pdf']);
+            });
+        } catch (\Exception $ex) {
+            $response    = $ex->getMessage();
+            return response()->json(['error' => $response]);
+        }
+
 
         return response()->json(['response' => $_response]);
     }

@@ -257,15 +257,19 @@
                                 <td>
                                     <button
                                         class="button_primary"
-                                        @click="print_invoice(invoice.id)"
+                                        @click="
+                                            print_invoice(invoice.id, 'rsd')
+                                        "
                                     >
                                         Stampaj
                                     </button>
                                     <button
                                         class="button_primary"
-                                        @click="print_invoiceEUR(invoice.id)"
+                                        @click="
+                                            print_invoice(invoice.id, 'eur')
+                                        "
                                     >
-                                        Stampa-EUR
+                                        Stampa EUR
                                     </button>
                                     <button
                                         v-if="view_send_mail_buttons"
@@ -330,7 +334,7 @@ export default {
             const baseUrl = window.axios.defaults.baseURL;
             var data = {
                 id: invoice_id,
-                url: `${baseUrl}/print/print/${invoice_id}`,
+                url: `${baseUrl}/print/print/${invoice_id}?currency=rsd`,
                 file: `${invoice}.pdf`,
                 mail: this.mail
             };
@@ -451,11 +455,8 @@ export default {
                 event.preventDefault();
             }
         },
-        print_invoice: function(id) {
-            window.open(`/print/print/${id}`);
-        },
-        print_invoiceEUR: function(id) {
-            window.open(`/printEUR/print/${id}`);
+        print_invoice: function(id, currency) {
+            window.open(`/print/print/${id}?currency=${currency}`);
         }
     },
     computed: {

@@ -16,9 +16,9 @@ class WarrantyController extends Controller
         extract($request->all(), EXTR_OVERWRITE);
 
 
-       // dd($subject);
+        // dd($subject);
 
-        $items = DB::select("SELECT w.id,w.subject,w.invoice,w.invoice_date, w.car,chasis,wt.type
+        $items = DB::connection('icar')->select("SELECT w.id,w.subject,w.invoice,w.invoice_date, w.car,chasis,wt.type
         ,case when isnull(w.approved,0)=1 then 'DA' else 'NE' end as approved_text,isnull(w.approved,'0') as approved,
         comment_approved,date_approved
         from _Warranty w 
@@ -47,14 +47,15 @@ class WarrantyController extends Controller
 
         $prop_data = [
             'items' => $paginationData,
-            'prop_values' => collect(['items'=> $items
-              //  'subject' => $subject
+            'prop_values' => collect([
+                'items' => $items
+                //  'subject' => $subject
             ])
         ];
 
         $title = "Pregled reklamacija";
 
-    // dd($items);
+        // dd($items);
         return view('warranty', ["title" => $title, "prop_data" => collect($prop_data)]);
     }
 
@@ -111,8 +112,8 @@ class WarrantyController extends Controller
                 'subject' => $subject, 'phone' => $phone, 'address' => $address,
                 'email' => $email, 'invoice' => $invoice, 'invoice_date' => $invoice_date,
                 'car' => $car, 'chasis' => $chasis, 'comment' => $comment,
-                'type_id' => $type_id, 'date' => $date, 'clerk' => $clerk, 'approved'=>$approved,
-                'date_approved'=> $date_approved, 'comment_approved' => $comment_approved,'approved_text' => $approved_text
+                'type_id' => $type_id, 'date' => $date, 'clerk' => $clerk, 'approved' => $approved,
+                'date_approved' => $date_approved, 'comment_approved' => $comment_approved, 'approved_text' => $approved_text
             ])
         ];
 
@@ -201,7 +202,7 @@ class WarrantyController extends Controller
         if (!isset($date)) $errors->push('Morate uneti datum reklamacije');
         if (!isset($clerk)) $errors->push('Morate uneti korisnika');
         //if (!isset($approved)) $errors->push('reklamacija nije potvrdjena');
-       //if (!isset($comment_approved)) $errors->push('opis  potvrdjene reklamacije ');
+        //if (!isset($comment_approved)) $errors->push('opis  potvrdjene reklamacije ');
 
         if ($errors->count() == 0) {
             if (($request->method() == "POST") && !isset($id)) {
@@ -211,8 +212,7 @@ class WarrantyController extends Controller
                 ,approved,  date_approved, comment_approved)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)  ",
                     [
-                        $subject, $phone, $address, $email, $invoice, $invoice_date, $car, $chasis, $comment, $type_id, $date, $clerk
-                        ,$approved, $date_approved, $comment_approved 
+                        $subject, $phone, $address, $email, $invoice, $invoice_date, $car, $chasis, $comment, $type_id, $date, $clerk, $approved, $date_approved, $comment_approved
                     ]
                 );
             }
@@ -225,10 +225,10 @@ class WarrantyController extends Controller
                 clerk = isnull(?,clerk), approved = isnull(?,approved), date_approved=isnull(?,date_approved), comment_approved=isnull(?, comment_approved) 
                  where id = ?",
                     [
-                        $subject, $phone, $address, $email, $invoice, $invoice_date, $car, $chasis, $comment, $type_id, $date, $clerk, 
+                        $subject, $phone, $address, $email, $invoice, $invoice_date, $car, $chasis, $comment, $type_id, $date, $clerk,
                         $approved, $date_approved, $comment_approved,
                         $id
-                  
+
                     ]
 
                 );
