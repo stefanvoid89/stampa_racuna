@@ -27,8 +27,8 @@ Route::get('/printEUR/print/{id}', 'PrintController@printEUR');
 Route::get('/print/print/{id}', 'PrintController@print');
 
 
-Route::get('/open_wo', 'OpenWoController@index');
-Route::get('/open_wo/export', 'OpenWoController@export');
+Route::get('/open_wo', 'OpenWOController@index');
+Route::get('/open_wo/export', 'OpenWOController@export');
 
 Route::get('/crm', 'CrmController@index');
 
