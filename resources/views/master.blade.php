@@ -27,8 +27,7 @@
                                 <tr>
                                     <td>
                                         <a href="/">
-                                            <img id="logo-image" src="/images/hit-auto-og-logotip.png"
-                                                style="height: 60px;" />
+                                            <img id="logo-image" src="/images/logo.png" style="height: 60px;" />
                                         </a>
                                     </td>
 
@@ -41,8 +40,8 @@
                                         @endif
     </div>
     <form class="form-inline" action="/logout" method="POST"> <input style="min-width: 150px !important;
-                                                    width: 150px !important;"
-            class="button_primary" type="submit" value="Odjavi se">
+                                                    width: 150px !important;" class="button_primary" type="submit"
+            value="Odjavi se">
         @csrf
     </form>
 
@@ -55,11 +54,11 @@
     </table>
     </td>
     </tr>
- <tr id="navbar-row">
-                    <td>
-                        <menu-component></menu-component>
-                    </td>
-                </tr> 
+    <tr id="navbar-row">
+        <td>
+            <menu-component></menu-component>
+        </td>
+    </tr>
     <tr id="main-row">
         <td>
             <div id="main_component">
