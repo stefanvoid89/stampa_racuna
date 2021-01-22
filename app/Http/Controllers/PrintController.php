@@ -11,6 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use GuzzleHttp\Client;
 use GuzzleHttp;
 use Illuminate\Support\Facades\File;
+use Spatie\ArrayToXml\ArrayToXml;
 
 
 class PrintController extends Controller
@@ -251,68 +252,95 @@ class PrintController extends Controller
         return response()->json(['response' => $_response]);
     }
 
-    public function send_mail_old(Request $request)
+
+    public function sendMailXML(Request $request)
     {
-        // {"url":"http://miservice.hitauto/print/print/281810","file":"281810.pdf"}
 
-        $response = "OK";
+        // $client, $date
+        $date = $request->input('date');
+        $client = $request->input('client');
+        $emails =  ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        $xml = $this->generateXML($client, $date);
 
-        $url = $request->input("url");
-        $file = $request->input("file");
-        $mail = $request->input("mail");
+        try {
+            Mail::raw("Postovani,\r\nu prilogu XML sa fakturama na dan " . $date . "\r\nLp", function ($message)  use ($xml, $emails, $client, $date) {
+                //   $message->from('us@example.com', 'Laravel');
 
-        $node_pdf_url = env("MAIL_NODE_PDF_SERVER_URL");
-        $path = env("MAIL_ATTACH_DIR") . $file;
-
-        // $path = env("MAIL_ATTACH_DIR") . '281882.pdf';
-        // return response()->json(['response' => $path]);
-        // return response()->json(['url' => $url, 'file' => $file, "url_pdf" => $node_pdf_url]);
-
-        $client = new Client();
-
-
-        $response = $client->post(
-            $node_pdf_url,
-            [
-                'json' =>
-                ['url' => $url, 'file' => $file]
-            ],
-            ['Content-Type' => 'application/json']
-        );
-
-        $response = json_decode($response->getBody(), true);
-
-
-        // return response()->json(['response' => $response]);
-
-
-        if (File::exists($path)) {
-
-            try {
-                Mail::raw("Postovani,\r\nu prilogu faktura" . $file . "\r\nLp", function ($message)  use ($path, $mail, $file) {
-                    //   $message->from('us@example.com', 'Laravel');
-
-                    $message->subject("Faktura " . $file);
-                    $message->to($mail);
-                    $message->attach($path);
-                });
-            } catch (\Exception $ex) {
-                $response    = $ex->getMessage();
-            }
-        } else $response = "Fajl nije kreiran, mail nece biti poslan";
-
-        return response()->json(['response' => $response]);
+                $message->subject("XML " . $date);
+                $message->to($emails);
+                $message->attachData($xml, $date, ["mime" => 'application/xml ']);
+            });
+        } catch (\Exception $ex) {
+            $response    = $ex->getMessage();
+            return response()->json(['error' => $response]);
+        }
+        return 1;
     }
 
-    public function test()
+
+
+
+    public function generateXML($client, $date)
     {
-        $client = new Client();
+        // $date = $request->input('date');
+        // $client = $request->input('client');
+
+        $sql_invoices = "SELECT NumIntMostrador, cliente, Documento as BrojDokumenta,convert(varchar(20),FechaDocumento,104)  as DatumDokumenta
+        , convert(varchar(20),FechaDocumento,104)   as DatumPrometa,convert(varchar(20), FechaDocumento+(select top 1 VctoDiasPrimer from tgModoPago where codigo=AlmModPago ),104)  as DatumValute
+        , rtrim(isnull(Apellido1,'')+' '+isnull(Apellido2,'')+' '+isnull(Nombre,'')) as NazivKupca, DireccionEditada as AdresaKupca,(select descrip from tgpobla where id=Pobla) as MestoKupca, CIF as PIBKupca,
+        (select top 1 comentario  from [taMostradorComentarios] where NumIntMostrador=m.NumIntMostrador) as Napomena
+         from taMostrador m 
+         where AnoDocum=2021  
+         and (FechaDocumento = :date or :_date is null)
+         and Cliente = :client ";
+
+        $sql_positions = "SELECT ml.NumIntMostrador,  replace(replace(replace(replace(ml.descrip,'Å','Č'),'Ñ','Ć') ,'¯','Š'),'ã','Ž') as NazivArtikla, (select top 1 descrip from tgMarca where marca= ml.marca) as Proizvodjac
+        , ml.ReferenciaEditada as KataloskiBroj,ml.Referencia as SifraArtikla,ml.Referencia as BarKod, ml.Referencia as OEBroj,'KOM' as JedinicaMere, CdadServida as Kolicina,PrecioUnitarioBruto as BrutoCena
+        , ml.ImpBrutoLinea as BrutoVrednost, Dctoaplicar as Rabat,ml.PrecioUnitarioNeto as NetoCena, ImpNetoLinea as NetoVrednost, (select top 1 Porcen from tgIvaPor where codigo=ml.IVA   order by codigo,FechaInicio desc) as StopaPDV 
+        , ImpNetoIVAInc-ImpNetoLinea as IznosPDV, ImpNetoIVAInc as IznosUkupno
+        from taMostrador m join taMostradorLineas ml on m.NumIntMostrador=ml.NumIntMostrador 
+        where AnoDocum=2021  and Cliente=37138
+        and (FechaDocumento = :date or :_date is null)
+        and Cliente = :client";
+
+        $stmt_invoices = DB::connection('icar')->getPdo()->prepare($sql_invoices);
+        $stmt_invoices->execute(['date' => $date, '_date' => $date, 'client' => $client]);
+        $stmt_positions = DB::connection('icar')->getPdo()->prepare($sql_positions);
+        $stmt_positions->execute(['date' => $date, '_date' => $date, 'client' => $client]);
+
+        $invoices = $stmt_invoices->fetchAll(\PDO::FETCH_ASSOC);
+        $positions = $stmt_positions->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($invoices as &$invoice) {
+
+            // echo '<br>from loop subject_id  ';
+            // print_r($subject["id"]);
+            // echo '<br>';
 
 
-        $_response = $client->get("http://mirent.report/pdf?hash=ZKfPuxUDXrS82JkqPY8STlJOQhmcWVebhc3QXVmM3IUNSTCVPv&params[id]=296878&report=invoice");
-        $content = $_response->getBody()->getContents();
-        $response = response()->make($content, 200);
-        $response->header('Content-Type', 'application/pdf'); // change this to the download content type.
-        return $response;
+            $temp = array_filter($positions, function ($pos) use ($invoice) {
+
+                return $pos['NumIntMostrador'] == $invoice['NumIntMostrador'];
+            });
+
+            foreach ($temp as &$t) {
+                unset($t['NumIntMostrador']);
+            }
+
+
+            if (count($temp) > 0) $invoice['Stavke']['Stavka'][] = $temp;
+
+            unset($invoice['NumIntMostrador']);
+            unset($invoice['cliente']);
+        }
+
+        $invoices = ["Dokument" => $invoices];
+
+        $arrayToXml = new ArrayToXml($invoices, 'Dokumenti', true, 'UTF-8');
+
+        $result = $arrayToXml->prettify()->toXml();
+
+        //dd(gettype($result));
+        return $result;
     }
 }

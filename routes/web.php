@@ -32,5 +32,5 @@ Route::get('/open_wo/export', 'OpenWOController@export');
 
 Route::get('/crm', 'CrmController@index');
 
-Route::get('/test', 'PrintController@test');
-Route::get('/generate-xml', 'HomeController@generateXML');
+Route::get('/generate-xml', 'PrintController@generateXML');
+Route::get('/send-xml', 'PrintController@sendMailXML');
