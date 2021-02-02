@@ -256,19 +256,62 @@ class PrintController extends Controller
     public function sendMailXML(Request $request)
     {
 
-        // $client, $date
-        $date = $request->input('date');
-        $client = $request->input('client');
-        $emails =  ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        $client = '9955';
+        $date = '2021-02-02';
+        // $date = $request->input('date');
+        //  $client = $request->input('client');
+        //$emails =  ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        $emails =  ['stefan.milosavljevic@hitauto.rs'];
+
+
         $xml = $this->generateXML($client, $date);
 
+
+        $pdfs = [];
+
+        $invoices = DB::connection("icar")->select("SELECT nal.NumIntMostrador
+        ,nal.Cliente,ltrim(rtrim(isnull(nal.Nombre,'')+' '+isnull(nal.apellido1,''))) as ImeKupca 
+        ,ltrim(rtrim(cast(nal.AnoDocum as char))) + '/' + ltrim(rtrim(cast(nal.Factura as char)))  as BrojRacuna
+        from  taMostrador nal
+           inner join tgcliente k on k.codigo =  nal.Cliente
+           where nal.fechadocumento  = cast(getdate() as date)
+           and Cliente = '9955'
+           and Cliente not in ('99999','501')
+           order by Cliente");
+
+
+        $client = new Client();
+
+        $hash = collect(DB::connection("sqlsrv")->select("SELECT top 1 report_hash from sys_params"))->first()->report_hash;
+        $baseUrl = env("REPORT_ENGINE_BASE_URL");
+
+
+        foreach ($invoices as $invoice) {
+
+            $id = $invoice->NumIntMostrador;
+            $url = "$baseUrl/pdf?hash=$hash&params[id]=$id&report=parts_invoice";
+
+            $_response = $client->get($url);
+            $content = $_response->getBody()->getContents();
+
+            $pdfs[$id . 'pdf'] =  $content;
+        }
+
+        //  dd($invoices);
+
+
+
         try {
-            Mail::raw("Postovani,\r\nu prilogu XML sa fakturama na dan " . $date . "\r\nLp", function ($message)  use ($xml, $emails, $client, $date) {
+            Mail::raw("Postovani,\r\nu prilogu XML sa fakturama na dan " . $date . "\r\nLp", function ($message)
+            use ($xml, $emails, $pdfs, $date) {
                 //   $message->from('us@example.com', 'Laravel');
 
                 $message->subject("XML " . $date);
                 $message->to($emails);
-                $message->attachData($xml, $date, ["mime" => 'application/xml ']);
+                $message->attachData($xml, $date . 'xml', ["mime" => 'application/xml ']);
+                foreach ($pdfs as $key => $pdf) {
+                    $message->attachData($pdf, $key, ["mime" => 'application/pdf ']);
+                }
             });
         } catch (\Exception $ex) {
             $response    = $ex->getMessage();
