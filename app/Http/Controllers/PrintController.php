@@ -12,11 +12,18 @@ use GuzzleHttp\Client;
 use GuzzleHttp;
 use Illuminate\Support\Facades\File;
 use Spatie\ArrayToXml\ArrayToXml;
+// use App\Services\StoreFilesService;
+use App\Facades\StoreFiles;
 
 
 class PrintController extends Controller
 {
 
+    // protected $storeFileServiceService;
+    // public function    __construct(StoreFilesService $storeFileServiceService)
+    // {
+    //     $this->storeFileServiceService = $storeFileServiceService;
+    // }
 
     public function index(Request $request)
     {
@@ -385,5 +392,30 @@ class PrintController extends Controller
 
         //dd(gettype($result));
         return $result;
+    }
+
+    public function test()
+    {
+
+
+
+        //   $invoices = StoreFiles::getInvoiceList('2021-02-02');
+        //dd($invoices->pluck('NumIntMostrador'));
+
+        // $i = $invoices->pluck('NumIntMostrador')->toArray();
+
+        // dd($i);
+
+        StoreFiles::fetchAndStoreInvoices('2021-02-02');
+        //  dd($invoices);
+
+        //   $files = StoreFiles::getFiles();
+
+
+        //  dd($files, $i);
+
+        //   $diff = array_diff($i, $files);
+
+        //   dd($diff);
     }
 }

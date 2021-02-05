@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\StoreFilesService;
+use Illuminate\Contracts\Cache\Store;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(StoreFilesService::class, function ($app) {
+            return new StoreFilesService();
+        });
     }
 
     /**

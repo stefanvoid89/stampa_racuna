@@ -34,3 +34,6 @@ Route::get('/crm', 'CrmController@index');
 
 Route::get('/generate-xml', 'PrintController@generateXML');
 Route::get('/send-xml', 'PrintController@sendMailXML');
+
+
+Route::get('/test', 'PrintController@test');
