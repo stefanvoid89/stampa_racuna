@@ -399,14 +399,14 @@ class PrintController extends Controller
 
 
 
-        //   $invoices = StoreFiles::getInvoiceList('2021-02-02');
-        //dd($invoices->pluck('NumIntMostrador'));
+        $invoices = StoreFiles::getInvoiceList('2021-02-02');
+        dd($invoices);
 
         // $i = $invoices->pluck('NumIntMostrador')->toArray();
 
         // dd($i);
 
-        StoreFiles::fetchAndStoreInvoices('2021-02-02');
+        //   StoreFiles::fetchAndStoreInvoices('2021-02-02');
         //  dd($invoices);
 
         //   $files = StoreFiles::getFiles();

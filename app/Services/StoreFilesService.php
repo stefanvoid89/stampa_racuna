@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StoreFilesService
 {
@@ -32,7 +33,7 @@ class StoreFilesService
         try {
             if (!File::exists($path))  File::put($path, $content);
         } catch (\Exception $ex) {
-            // log exception
+            Log::error($ex->getMessage());
         }
     }
     public function fetchFile($id)
@@ -72,11 +73,13 @@ class StoreFilesService
     {
         return collect(DB::connection("icar")->select("SELECT  nal.NumIntMostrador
         ,nal.Cliente,ltrim(rtrim(isnull(nal.Nombre,'')+' '+isnull(nal.apellido1,''))) as ImeKupca 
-        ,ltrim(rtrim(cast(nal.AnoDocum as char))) + '/' + ltrim(rtrim(cast(nal.Factura as char)))  as BrojRacuna
+        ,ltrim(rtrim(cast(nal.AnoDocum as char))) + '/' + ltrim(rtrim(cast(nal.Documento as char)))  as BrojRacuna
         from  taMostrador nal
            inner join tgcliente k on k.codigo =  nal.Cliente
-           where nal.fechadocumento  = ?
-           and Cliente not in ('99999','501')", [$date]));
+           where 1=1
+           and OpcionMos in (SELECT OpcionMos FROM [dbo].[taMostradorOpcion] where facturaDirecta=1 )
+        and Documento <>'0'
+        and nal.fechadocumento  = ?", [$date]));
     }
 
     public function getFiles()

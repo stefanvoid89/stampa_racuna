@@ -44,7 +44,7 @@ class GenerateInvoices extends Command
             StoreFiles::fetchAndStoreInvoices($date);
             Log::info("Generate ICAR part invoices - Time: " . date('Y-m-d H:i:s'));
         } catch (\Exception $ex) {
-            Log::error($ex);
+            Log::error($ex->getMessage());
         }
     }
 }
