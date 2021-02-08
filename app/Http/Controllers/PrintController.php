@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\File;
 use Spatie\ArrayToXml\ArrayToXml;
 // use App\Services\StoreFilesService;
 use App\Facades\StoreFiles;
+use App\Facades\SendMails;
 
 
 class PrintController extends Controller
@@ -171,40 +172,6 @@ class PrintController extends Controller
     }
 
 
-    public function printEur($id)
-    {
-        $header = collect(DB::select("EXEC _MiServiceHeader :id", ['id' => $id]))->first();
-
-        $positions =  collect(DB::select("EXEC _MiServicePositionsEUR :id", ['id' => $id]));
-
-        $positions_sum = $positions->firstWhere('RBR', '1');
-
-        //  dd($positions_sum);
-        // $positions = DB::select("SELECT 1 as one ", ['id' => $id]);
-
-        // $positions_sum = DB::select("SELECT 1 as one", ['id' => $id]);
-
-
-        $var = "";
-
-        $title = "Stampa ugovora";
-
-        $marka = $header->Marca; // renault motrio dacia
-        $location = $header->Lokacija; // sajmiste
-        $kome_faktura = "vlasnik"; // platioc
-        $mesto_prometa = $header->Mesto;
-
-
-        $page_html = view("print.layouts.page_invoiceEur", ['marka' => $marka, 'location' => $location, 'mesto_prometa' => $mesto_prometa, 'title' => $title, 'header' => $header])->render();
-        $html_to_props = view("print.content.invoiceEUR_print", [
-            'title' => $title, 'header' => $header, 'positions' => $positions, 'positions_sum' => $positions_sum
-        ])->render();
-
-        return view("print.render.render", [
-            'title' => $title, 'prop_data' => collect(['html_prop' => $html_to_props, 'page' => $page_html])
-        ]);
-    }
-
 
     public function fetch_subjects(Request $request)
     {
@@ -328,86 +295,27 @@ class PrintController extends Controller
     }
 
 
-
-
-    public function generateXML($client, $date)
-    {
-        // $date = $request->input('date');
-        // $client = $request->input('client');
-
-        $sql_invoices = "SELECT NumIntMostrador, cliente, Documento as BrojDokumenta,convert(varchar(20),FechaDocumento,104)  as DatumDokumenta
-        , convert(varchar(20),FechaDocumento,104)   as DatumPrometa,convert(varchar(20), FechaDocumento+(select top 1 VctoDiasPrimer from tgModoPago where codigo=AlmModPago ),104)  as DatumValute
-        , rtrim(isnull(Apellido1,'')+' '+isnull(Apellido2,'')+' '+isnull(Nombre,'')) as NazivKupca, DireccionEditada as AdresaKupca,(select descrip from tgpobla where id=Pobla) as MestoKupca, CIF as PIBKupca,
-        (select top 1 comentario  from [taMostradorComentarios] where NumIntMostrador=m.NumIntMostrador) as Napomena
-         from taMostrador m 
-         where AnoDocum=2021  
-         and (FechaDocumento = :date or :_date is null)
-         and Cliente = :client ";
-
-        $sql_positions = "SELECT ml.NumIntMostrador,  replace(replace(replace(replace(ml.descrip,'Å','Č'),'Ñ','Ć') ,'¯','Š'),'ã','Ž') as NazivArtikla, (select top 1 descrip from tgMarca where marca= ml.marca) as Proizvodjac
-        , ml.ReferenciaEditada as KataloskiBroj,ml.Referencia as SifraArtikla,ml.Referencia as BarKod, ml.Referencia as OEBroj,'KOM' as JedinicaMere, CdadServida as Kolicina,PrecioUnitarioBruto as BrutoCena
-        , ml.ImpBrutoLinea as BrutoVrednost, Dctoaplicar as Rabat,ml.PrecioUnitarioNeto as NetoCena, ImpNetoLinea as NetoVrednost, (select top 1 Porcen from tgIvaPor where codigo=ml.IVA   order by codigo,FechaInicio desc) as StopaPDV 
-        , ImpNetoIVAInc-ImpNetoLinea as IznosPDV, ImpNetoIVAInc as IznosUkupno
-        from taMostrador m join taMostradorLineas ml on m.NumIntMostrador=ml.NumIntMostrador 
-        where AnoDocum=2021  and Cliente=37138
-        and (FechaDocumento = :date or :_date is null)
-        and Cliente = :client";
-
-        $stmt_invoices = DB::connection('icar')->getPdo()->prepare($sql_invoices);
-        $stmt_invoices->execute(['date' => $date, '_date' => $date, 'client' => $client]);
-        $stmt_positions = DB::connection('icar')->getPdo()->prepare($sql_positions);
-        $stmt_positions->execute(['date' => $date, '_date' => $date, 'client' => $client]);
-
-        $invoices = $stmt_invoices->fetchAll(\PDO::FETCH_ASSOC);
-        $positions = $stmt_positions->fetchAll(\PDO::FETCH_ASSOC);
-
-        foreach ($invoices as &$invoice) {
-
-            // echo '<br>from loop subject_id  ';
-            // print_r($subject["id"]);
-            // echo '<br>';
-
-
-            $temp = array_filter($positions, function ($pos) use ($invoice) {
-
-                return $pos['NumIntMostrador'] == $invoice['NumIntMostrador'];
-            });
-
-            foreach ($temp as &$t) {
-                unset($t['NumIntMostrador']);
-            }
-
-
-            if (count($temp) > 0) $invoice['Stavke']['Stavka'][] = $temp;
-
-            unset($invoice['NumIntMostrador']);
-            unset($invoice['cliente']);
-        }
-
-        $invoices = ["Dokument" => $invoices];
-
-        $arrayToXml = new ArrayToXml($invoices, 'Dokumenti', true, 'UTF-8');
-
-        $result = $arrayToXml->prettify()->toXml();
-
-        //dd(gettype($result));
-        return $result;
-    }
-
     public function test()
     {
 
 
 
-        $invoices = StoreFiles::getInvoiceList('2021-02-02');
-        dd($invoices);
+        //  $invoices = StoreFiles::getInvoiceList('2021-02-02');
+        //  dd($invoices);
+
+        // $clients = SendMails::getClientList('2021-02-08');
+        // dd($clients);
+
+        $invoices = SendMails::sendMails('2021-02-08');
+        // dd($invoices);
+
 
         // $i = $invoices->pluck('NumIntMostrador')->toArray();
 
         // dd($i);
 
         //   StoreFiles::fetchAndStoreInvoices('2021-02-02');
-        //  dd($invoices);
+        //   dd($invoices);
 
         //   $files = StoreFiles::getFiles();
 
