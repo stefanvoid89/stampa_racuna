@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('generate:invoices')
             ->everyTenMinutes()
+            ->between("08:00", "17:00")
+            ->withoutOverlapping();
+
+        $schedule->command('send:invoices')
+            ->everyThirtyMinutes()
+            ->between("18:00", "20:00")
             ->withoutOverlapping();
     }
 

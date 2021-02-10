@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Pagination\LengthAwarePaginator;
 use GuzzleHttp\Client;
@@ -294,20 +295,57 @@ class PrintController extends Controller
         return 1;
     }
 
+    public function functionWithCallback($arg, $callback)
+    {
+        $callback($arg);
+    }
+
+
 
     public function test()
     {
+
+
+        $invoices = SendMails::sendMails('2021-02-09');
+        dd($invoices);
+
+
+
+        // try {
+        //     Mail::raw("test", function ($message) {
+        //         //   $message->from('us@example.com', 'Laravel');
+
+        //         $message->subject("test");
+        //         $message->to(['stefan.milosavljevic@hitauto.rs']);
+
+        //         $path = storage_path('nesto.pdf');
+        //         echo ($path);
+        //         echo ("<br>");
+        //         $message->attach($path, ["mime" => 'application/pdf ']);
+        //     });
+        // } catch (\Exception $ex) {
+        //     echo ($ex->getMessage());
+        //     Log::error($ex);
+        // }
+
+        // $path = storage_path('nesto.pdf');
+        // try {
+        //     $file_handle = fopen("uploads/" . $path . "", "r");
+        // } catch (\Exception $hi) {
+        //     die("Fehler");
+        // }
+
+        return 1;
+
 
 
 
         //  $invoices = StoreFiles::getInvoiceList('2021-02-02');
         //  dd($invoices);
 
-        // $clients = SendMails::getClientList('2021-02-08');
-        // dd($clients);
 
-        $invoices = SendMails::sendMails('2021-02-08');
-        // dd($invoices);
+
+
 
 
         // $i = $invoices->pluck('NumIntMostrador')->toArray();

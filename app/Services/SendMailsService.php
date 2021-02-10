@@ -10,6 +10,8 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Mail\Message;
+
 class SendMailsService
 {
 
@@ -19,7 +21,7 @@ class SendMailsService
     public function __construct()
     {
         $this->dir_path =  storage_path('app/invoices');
-        //  $this->admin_emails = ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        // $this->admin_emails = ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
         $this->admin_emails = ['stefan.milosavljevic@hitauto.rs'];
     }
 
@@ -45,7 +47,7 @@ class SendMailsService
             try {
                 $this->sendMail($client, $date);
                 $successful[] = $client;
-            } catch (\Exception $ex) {
+            } catch (\Throwable $ex) {
                 $unsuccessful[] = $client;
                 Log::error(__METHOD__ . ' ex: ' . $ex->getMessage());
             }
@@ -70,18 +72,19 @@ class SendMailsService
 
     public function sendConfirmationMail($successful, $unsuccessful)
     {
-        try {
-            Mail::send(
-                'confirmation_mail',
-                ['successful' => $successful, 'unsuccessful' => $unsuccessful],
-                function ($message) {
-                    $message->to($this->admin_emails);
-                    $message->subject('Izvestaj o slanju faktura klijentima');
-                }
-            );
-        } catch (\Exception $ex) {
-            Log::error(__METHOD__ . ' ex: ' . $ex->getMessage());
-        }
+        if (count($successful) > 0 || count($unsuccessful) > 0)
+            try {
+                Mail::send(
+                    'confirmation_mail',
+                    ['successful' => $successful, 'unsuccessful' => $unsuccessful],
+                    function ($message) {
+                        $message->to($this->admin_emails);
+                        $message->subject('Izvestaj o slanju faktura klijentima');
+                    }
+                );
+            } catch (\Exception $ex) {
+                Log::error(__METHOD__ . ' ex: ' . $ex->getMessage());
+            }
     }
 
     public function sendMail($client, $date)
@@ -100,22 +103,29 @@ class SendMailsService
 
 
         try {
+            // $message = new Message();
             Mail::raw("Postovani,\r\nu prilogu fakture na dan " . $date . "\r\nLp", function ($message)
             use ($xml, $emails, $date, $invoices, $clientName) {
                 $message->subject("Fakture za dan " . $date . ' - ' . $clientName);
                 $message->to($emails);
                 $message->attachData($xml, $date . '.xml', ["mime" => 'application/xml ']);
+
                 foreach ($invoices as $invoice) {
 
                     $filename = $invoice->NumIntMostrador . '.pdf';
                     $path = $this->dir_path . '/' . $filename;
                     $name = $invoice->BrojRacuna . '.pdf';
 
+                    if (!File::exists($path)) {
+                        throw new \Exception('Ne postoji file ' . $filename);
+                        break;
+                    }
+
                     $message->attach($path,  ["as" => $name, "mime" => 'application/pdf']);
                 }
             });
-        } catch (\Exception $ex) {
-
+        } catch (\Throwable $ex) {
+            Log::error(__METHOD__ . ' ex: ' . $ex->getMessage());
             throw $ex;
         }
     }
@@ -129,7 +139,7 @@ class SendMailsService
     public function storeClientList($date)
     {
 
-        $clients =  DB::connection("icar")->select("SELECT  distinct  nal.Cliente as client
+        $clients =  DB::connection("icar")->select("SELECT  distinct  top 2 nal.Cliente as client
         ,ltrim(rtrim(isnull(nal.Nombre,'')+' '+isnull(nal.apellido1,'')))  as client_name
         from  taMostrador nal
            inner join tgcliente k on k.codigo =  nal.Cliente
