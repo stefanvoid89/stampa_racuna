@@ -21,14 +21,14 @@ class SendMailsService
     public function __construct()
     {
         $this->dir_path =  storage_path('app/invoices');
-        // $this->admin_emails = ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
-        $this->admin_emails = ['stefan.milosavljevic@hitauto.rs'];
+        $this->admin_emails = ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        //$this->admin_emails = ['stefan.milosavljevic@hitauto.rs'];
     }
 
     public function getEmails($client)
     {
-        //  return ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
-        return ['stefan.milosavljevic@hitauto.rs'];
+        return ['stefan.milosavljevic@hitauto.rs', 'persida.pandurovic@hitauto.rs'];
+        //  return ['stefan.milosavljevic@hitauto.rs'];
     }
 
     public function sendMails($date)
