@@ -29,6 +29,10 @@ Route::get('/print/print/{id}', 'PrintController@print');
 Route::get('/open_wo', 'OpenWOController@index');
 Route::get('/open_wo/export', 'OpenWOController@export');
 
+Route::get('/regular_maint', 'RegularMaintController@index');
+Route::get('/regular_maint/export', 'RegularMaintController@export');
+Route::get('/regular_maint/export_detail', 'RegularMaintController@export_detail');
+
 Route::get('/crm', 'CrmController@index');
 
 Route::get('/generate-xml', 'PrintController@generateXML');

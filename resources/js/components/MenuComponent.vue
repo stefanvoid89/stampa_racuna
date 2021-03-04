@@ -25,7 +25,8 @@ export default {
                     label: "SERVIS",
                     nodes: [
                         { label: "STAMPA FAKTURA", link: "/print" },
-                        { label: "NEZATVORENI NALOZI", link: "/open_wo" }
+                        { label: "NEZATVORENI NALOZI", link: "/open_wo" },
+                        { label: "REDOVNO ODRZAVANJE", link: "/regular_maint" }
                     ]
                 },
 
